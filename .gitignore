@@ -47,3 +47,6 @@ pkg
 
 # For rubinius:
 #*.rbc
+
+# Config files.
+spec/api_key.txt
