@@ -30,7 +30,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
   
   def subscriber_by_email(email)
     self.subscribers.each do |sub|
-      if sub.data(:email).to_s.strip == email.to_s.strip
+      if sub.data(:email).to_s.downcase.strip == email.to_s.downcase.strip
         return sub
       end
     end
