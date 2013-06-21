@@ -28,6 +28,16 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     raise "Finish me!"
   end
   
+  def subscriber_by_email(email)
+    self.subscribers.each do |sub|
+      if sub.data(:email).to_s.strip == email.to_s.strip
+        return sub
+      end
+    end
+    
+    raise "Could not find subscriber by that email: '#{email}' on this mailing list '#{self.data(:name)}'."
+  end
+  
   def remove_subscriber(subscriber)
     res = aos.req_json("v1/mailinglists/#{self.data(:id)}/subscriptions/#{subscriber.data(:id)}", :delete)
     if res["Result"] == "Deleted"

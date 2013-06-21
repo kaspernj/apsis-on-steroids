@@ -67,7 +67,7 @@ class ApsisOnSteroids
   
   def mailing_list_by_name(name)
     self.mailing_lists.each do |mlist|
-      return mlist if name.to_s == mlist.name.to_s
+      return mlist if name.to_s == mlist.data(:name).to_s
     end
     
     raise "Could not find mailing list by that name: '#{name}'."
