@@ -26,6 +26,7 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
     
     Timeout.timeout(30) do
       loop do
+        sleep 0.5
         res = aos.req_json(url.path)
         
         if res["State"] == "2"
