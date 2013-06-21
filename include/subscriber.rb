@@ -14,32 +14,25 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
   # Returns true if the subscriber is active.
   def active?
     details = self.details
-    
-    if details[:pending]
-      return false
-    end
-    
+    return false if details[:pending]
     return true
   end
   
   # Update one or more details on the subscriber.
   def update(data)
-    res = aos.req_json("v1/subscribers/queue", :post, :json => [
-      {
-        :Id => data(:id)
-      }.merge(data)
-    ])
-    
+    res = aos.req_json("v1/subscribers/queue", :post, :json => [data.merge(:Id => self.data(:id))])
     url = URI.parse(res["Result"]["PollURL"])
     data = nil
     
-    loop do
-      res = aos.req_json(url.path)
-      
-      if res["State"] == "2"
-        url_data = URI.parse(res["DataUrl"])
-        data = aos.req_json(url_data.path)
-        break
+    Timeout.timeout(30) do
+      loop do
+        res = aos.req_json(url.path)
+        
+        if res["State"] == "2"
+          url_data = URI.parse(res["DataUrl"])
+          data = aos.req_json(url_data.path)
+          break
+        end
       end
     end
     

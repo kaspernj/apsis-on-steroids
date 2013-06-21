@@ -36,4 +36,28 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       raise "Unexpected result: '#{res["Result"]}'."
     end
   end
+  
+  def delete
+    res = aos.req_json("v1/mailinglists/", :delete, :json => [data(:id)])
+    
+    url = URI.parse(res["Result"]["PollURL"])
+    data = nil
+    
+    Timeout.timeout(30) do
+      loop do
+        sleep 0.5
+        res = aos.req_json(url.path)
+        
+        if res["State"] == "2"
+          data_url = URI.parse(res["DataUrl"])
+          data = aos.req_json(data_url.path)
+          break
+        end
+      end
+    end
+    
+    data.each do |element|
+      raise "Unexpected result: '#{data}'." if element["Value"] != "Succefully deleted"
+    end
+  end
 end

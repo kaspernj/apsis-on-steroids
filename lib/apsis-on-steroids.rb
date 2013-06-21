@@ -14,6 +14,8 @@ class ApsisOnSteroids
   end
   
   def initialize(args)
+    raise "Invalid API key: '#{args[:api_key]}' from: '#{args}'." if args[:api_key].to_s.strip.empty?
+    
     @args = args
     @http = Http2.new(
       :host => "se.api.anpdm.com",
@@ -41,7 +43,7 @@ class ApsisOnSteroids
   end
   
   def mailing_lists
-    res = req_json("v1/mailinglists/1/10")
+    res = req_json("v1/mailinglists/1/999")
     
     ret = []
     res["Result"]["Items"].each do |mlist|
@@ -52,6 +54,15 @@ class ApsisOnSteroids
     end
     
     return ret
+  end
+  
+  def create_mailing_list(data)
+    res = req_json("v1/mailinglists/", :post, :json => data)
+    if res["Code"] == 1
+      # Success!
+    else
+      raise "Unexpected result: '#{res}'."
+    end
   end
   
   def mailing_list_by_name(name)
@@ -127,7 +138,12 @@ class ApsisOnSteroids
     # Parse arguments, send and parse the result.
     args = {:url => url}.merge(method_args)
     http_res = @http.__send__(type, args)
-    res = JSON.parse(http_res.body)
+    
+    begin
+      res = JSON.parse(http_res.body)
+    rescue JSON::ParserError
+      raise "Invalid JSON given: '#{http_res.body}'."
+    end
     
     # Check for various kind of server errors and raise them as Ruby errors if present.
     raise "Failed on server with code #{res["Code"]}: #{res["Message"]}" if res.is_a?(Hash) && res.key?("Code") && res["Code"] < 0

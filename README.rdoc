@@ -10,9 +10,22 @@ Library that implements the Apsis API in Ruby in regards to administrating subsc
     :api_key => "[your api key]"
   )
 
+=== Create a mailing list
+
+  aos.create_mailing_list(
+    :Name => "my_awesome_list",
+    :FromName => "Kasper Johansen",
+    :FromEmail => "kj@naoshi-dev.com",
+    :CharacterSet => "utf-8"
+  )
+
 === Get a mailing list.
 
   mlist = aos.mailing_list_by_name("test_list")
+
+=== Delete a mailing list.
+
+  mlist.delete
 
 === Get a subscriber from a mailing list.
 

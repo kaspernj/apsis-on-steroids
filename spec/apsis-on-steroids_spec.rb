@@ -8,14 +8,30 @@ describe "ApsisOnSteroids" do
     )
   end
   
+  it "should create and delete a mailing list" do
+    name = "create-mlist-#{Time.now.to_f.to_s}"
+    
+    $aos.create_mailing_list(
+      :Name => name,
+      :FromName => "Kasper Johansen",
+      :FromEmail => "kj@naoshi-dev.com",
+      :CharacterSet => "utf-8"
+    )
+    
+    mlist = $aos.mailing_list_by_name(name)
+    
+    sleep 1
+    mlist.delete
+  end
+  
   it "can get a mailing list" do
     $mlist = $aos.mailing_list_by_name("kj")
   end
   
   it "can create subscribers" do
     $mlist.create_subscribers([{
-      "Email" => "kj@gfish.com",
-      "Name" => "Kasper Johansen"
+      :Email => "kj@gfish.com",
+      :Name => "Kasper Johansen"
     }])
   end
   
@@ -23,23 +39,26 @@ describe "ApsisOnSteroids" do
     $sub = $aos.subscriber_by_email("kj@gfish.com")
     details = $sub.details
     details.is_a?(Hash).should eql(true)
-    details.key?(:pending).should eql(true)
+    details.key?(:pending).should eql(false)
   end
   
   it "can update subscribers" do
     new_email = "kaspernj#{Time.now.to_f}@naoshi-dev.com"
     $sub.update(:Email => new_email)
     $sub.details[:Email].should eql(new_email)
+    $sub.details[:Name].should eql("Kasper Johansen")
   end
   
   it "should not overwrite data when updating" do
-    addr = Time.now.to_f.to_s
-    $sub.update(:Address => addr)
+    phone = Time.now.to_i.to_s
+    $sub.update(:PhoneNumber => phone)
+    $sub.details[:PhoneNumber].should eql(phone)
     
     new_email = "kaspernj#{Time.now.to_f}@naoshi-dev.com"
     $sub.update(:Email => new_email)
+    $sub.details[:Email].should eql(new_email)
     
-    $sub.details[:Address].should eql(addr)
+    $sub.details[:PhoneNumber].should eql(phone)
   end
   
   it "can remove subscribers from lists" do
