@@ -14,9 +14,13 @@ Library that implements the Apsis API in Ruby in regards to administrating subsc
 
   mlist = aos.mailing_list_by_name("test_list")
 
+=== Get a subscriber from a mailing list.
+
+  sub = mlist.subscriber_by_email("some@email.com")
+
 === Create one or more subscribers in a mailing list.
 
-  sub = mlist.create_subscribers(
+  mlist.create_subscribers(
     [
       {
         :Email => "some@email.com",
