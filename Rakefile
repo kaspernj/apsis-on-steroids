@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "apsis-on-steroids"
   gem.homepage = "http://github.com/kaspernj/apsis-on-steroids"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{A Ruby API for the Apsis mail service. }
+  gem.description = %Q{A Ruby API for the Apsis mail service. }
   gem.email = "k@spernj.org"
   gem.authors = ["kaspernj"]
   # dependencies defined in Gemfile
