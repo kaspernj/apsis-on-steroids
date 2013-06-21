@@ -18,7 +18,7 @@ class ApsisOnSteroids::SubBase
     raise "No such data: '#{name}'."
   end
   
-  def method_missing(name)
+  def method_missing(name, *args, &blk)
     return @data[name.to_sym] if @data && @data.key?(name.to_sym)
     raise "No such method: '#{name}'."
   end

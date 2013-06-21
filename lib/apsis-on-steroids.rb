@@ -2,6 +2,7 @@ require "json"
 require "http2"
 require "string-cases"
 require "timeout"
+require "cgi"
 
 class ApsisOnSteroids
   attr_reader :http
@@ -19,7 +20,7 @@ class ApsisOnSteroids
       :port => 8443,
       :ssl => true,
       :follow_redirects => false,
-      :debug => true,
+      :debug => args[:debug],
       :extra_headers => {
         "Accept" => "text/json, application/json"
       },
@@ -61,8 +62,65 @@ class ApsisOnSteroids
     raise "Could not find mailing list by that name: '#{name}'."
   end
   
-  def create_mailing_list(args)
-    raise "stub!"
+  def subscribers
+    # Request a list of all subs.
+    res = req_json("v1/subscribers/all", :post, :json => {
+      "AllDemographics" => true,
+      "FieldNames" => []
+    })
+    
+    # Wait for the server to generate the list.
+    url = URI.parse(res["Result"]["PollURL"])
+    data = nil
+    
+    Timeout.timeout(30) do
+      loop do
+        sleep 0.5
+        res = req_json(url.path)
+        
+        if res["State"] == "2"
+          url_data = URI.parse(res["DataUrl"])
+          data = req_json(url_data.path)
+          break
+        end
+      end
+    end
+    
+    # Parse the list of subscribers.
+    ret = [] unless block_given?
+    
+    data.each do |sub_data|
+      sub = ApsisOnSteroids::Subscriber.new(
+        :aos => self,
+        :data => sub_data
+      )
+      
+      if block_given?
+        yield sub
+      else
+        ret << sub
+      end
+    end
+    
+    if block_given?
+      return nil
+    else
+      return ret
+    end
+  end
+  
+  def subscriber_by_email(email)
+    res = req_json("v1/subscribers/email/lookup/#{CGI.escape(email)}")
+    
+    sub = ApsisOnSteroids::Subscriber.new(
+      :aos => self,
+      :data => {
+        "Id" => res["Result"],
+        "Email" => email
+      }
+    )
+    
+    return sub
   end
   
   def req_json(url, type = :get, method_args = {})
@@ -72,8 +130,8 @@ class ApsisOnSteroids
     res = JSON.parse(http_res.body)
     
     # Check for various kind of server errors and raise them as Ruby errors if present.
-    raise "Failed on server with code #{res["Code"]}: #{res["Message"]}" if res.key?("Code") && res["Code"] < 0
-    raise "Failed on server with state #{res["State"]} and name '#{res["StateName"]}': #{res["Message"]}" if res.key?("State") && res["State"].to_i < 0
+    raise "Failed on server with code #{res["Code"]}: #{res["Message"]}" if res.is_a?(Hash) && res.key?("Code") && res["Code"] < 0
+    raise "Failed on server with state #{res["State"]} and name '#{res["StateName"]}': #{res["Message"]}" if res.is_a?(Hash) && res.key?("State") && res["State"].to_i < 0
     
     # Return the result.
     return res
