@@ -136,7 +136,7 @@ class ApsisOnSteroids
   
   def req_json(url, type = :get, method_args = {})
     # Parse arguments, send and parse the result.
-    args = {:url => url}.merge(method_args)
+    args = { :url => url.start_with?('/') ? url[1..-1] : url }.merge(method_args)
     http_res = @http.__send__(type, args)
     
     begin
