@@ -5,7 +5,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
   
   def subscribers
     res = aos.req_json("v1/mailinglists/#{data(:id)}/subscribers/all", :post, :json => {
-      "AllDemographics" => true,
+      "AllDemographics" => false,
       "FieldNames" => []
     })
     
