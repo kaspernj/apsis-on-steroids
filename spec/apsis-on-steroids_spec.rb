@@ -73,6 +73,10 @@ describe "ApsisOnSteroids" do
       sub.details[:PhoneNumber].should eql(phone)
     end
 
+    it "can lookup the subscriber on the list" do
+      mlist.subscriber_by_email(sub.data(:email)).should_not eq nil
+    end
+
     it "can remove subscribers from lists" do
       mlist.remove_subscriber(sub)
     end
