@@ -77,7 +77,7 @@ describe "ApsisOnSteroids" do
       mlist.remove_subscriber(sub)
     end
 
-    it "can get lists of subscribers from lists" do # err
+    it "can get lists of subscribers from lists" do
       mlist.subscribers do |sub|
         puts "Subscriber: #{sub}"
       end
