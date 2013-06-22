@@ -29,10 +29,12 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
   end
   
   def subscriber_by_email(email)
-    self.subscribers.each do |sub|
-      if sub.data(:email).to_s.downcase.strip == email.to_s.downcase.strip
-        return sub
-      end
+    sub = aos.subscriber_by_email(email)
+
+    res = aos.req_json("v1/subscribers/#{sub.data(:id)}/mailinglists")
+    if res["Result"]
+      mailinglist_ids = res["Result"]["Mailinglists"].map { |m| m["Id"].to_i }
+      return sub if mailinglist_ids.include?(self.data(:id))
     end
     
     raise "Could not find subscriber by that email: '#{email}' on this mailing list '#{self.data(:name)}'."
