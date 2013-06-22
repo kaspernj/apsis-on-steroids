@@ -10,22 +10,22 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     })
     
     url = URI.parse(res["Result"]["PollURL"])
+    data_subscribers = nil
     
     Timeout.timeout(30) do
       loop do
         sleep 0.5
         res = aos.req_json(url.path)
-        
-        puts "Status res: #{res}"
-        
+
         if res["State"] == "2"
+          data_url = URI.parse(res["DataUrl"])
+          data_subscribers = aos.req_json(data_url.path)
           break
         end
       end
     end
-    
-    puts "Test: #{res}"
-    raise "Finish me!"
+
+    data_subscribers
   end
   
   def subscriber_by_email(email)
