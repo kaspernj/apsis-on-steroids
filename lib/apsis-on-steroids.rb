@@ -74,8 +74,12 @@ class ApsisOnSteroids
   end
     
   def subscriber_by_email(email)
-    res = req_json("v1/subscribers/email/lookup/#{CGI.escape(email)}")
-    
+    begin
+      res = req_json("v1/subscribers/email/lookup/#{CGI.escape(email)}")
+    rescue
+      raise "Could not find subscriber by that email in the system"
+    end
+  
     sub = ApsisOnSteroids::Subscriber.new(
       :aos => self,
       :data => {
