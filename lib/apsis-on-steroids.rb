@@ -72,54 +72,7 @@ class ApsisOnSteroids
     
     raise "Could not find mailing list by that name: '#{name}'."
   end
-  
-  def subscribers
-    # Request a list of all subs.
-    res = req_json("v1/subscribers/all", :post, :json => {
-      "AllDemographics" => true,
-      "FieldNames" => []
-    })
     
-    # Wait for the server to generate the list.
-    url = URI.parse(res["Result"]["PollURL"])
-    data = nil
-    
-    Timeout.timeout(30) do
-      loop do
-        sleep 0.5
-        res = req_json(url.path)
-        
-        if res["State"] == "2"
-          url_data = URI.parse(res["DataUrl"])
-          data = req_json(url_data.path)
-          break
-        end
-      end
-    end
-    
-    # Parse the list of subscribers.
-    ret = [] unless block_given?
-    
-    data.each do |sub_data|
-      sub = ApsisOnSteroids::Subscriber.new(
-        :aos => self,
-        :data => sub_data
-      )
-      
-      if block_given?
-        yield sub
-      else
-        ret << sub
-      end
-    end
-    
-    if block_given?
-      return nil
-    else
-      return ret
-    end
-  end
-  
   def subscriber_by_email(email)
     res = req_json("v1/subscribers/email/lookup/#{CGI.escape(email)}")
     

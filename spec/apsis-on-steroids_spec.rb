@@ -90,10 +90,5 @@ describe "ApsisOnSteroids" do
     it "can validate if a subscriber is active or not" do
       sub.active?.should eql(true)
     end
-
-    it "can get a list of all subscribers" do # should not be run each time - will end up being rather big!
-      total_list = aos.subscribers
-      total_list.is_a?(Array).should eql(true)
-    end
   end
 end
