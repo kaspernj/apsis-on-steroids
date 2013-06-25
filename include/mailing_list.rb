@@ -1,6 +1,24 @@
 class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
   def create_subscribers(data)
-    aos.req_json("v1/subscribers/mailinglist/#{data(:id)}/queue", :post, :json => data)
+    res = aos.req_json("v1/subscribers/mailinglist/#{data(:id)}/queue", :post, :json => data)
+
+    url = URI.parse(res["Result"]["PollURL"])
+    data_subscribers = nil
+    
+    Timeout.timeout(30) do
+      loop do
+        sleep 0.5
+        res = aos.req_json(url.path)
+
+        if res["State"] == "2"
+          data_url = URI.parse(res["DataUrl"])
+          data_subscribers = aos.req_json(data_url.path)
+          break
+        end
+      end
+    end
+
+    data_subscribers
   end
   
   def subscribers
