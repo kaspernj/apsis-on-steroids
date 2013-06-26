@@ -69,8 +69,8 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
   
   def remove_subscriber(subscriber)
     res = aos.req_json("v1/mailinglists/#{self.data(:id)}/subscriptions/#{subscriber.data(:id)}", :delete)
-    if res["Result"] == "Deleted"
-      return nil
+    if res["Message"] == "Successfully deleted Subscription"
+      true
     else
       raise "Unexpected result: '#{res["Result"]}'."
     end
