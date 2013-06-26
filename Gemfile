@@ -3,7 +3,7 @@ source "http://rubygems.org"
 # Example:
 #   gem "activesupport", ">= 2.3.5"
 
-gem "http2", ">= 0.0.16"
+gem "http2", :git => "git@github.com:kaspernj/http2.git", :ref => "c3939e8"
 gem "string-cases"
 
 # Add dependencies to develop your gem here.
