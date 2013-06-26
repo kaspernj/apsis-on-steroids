@@ -57,6 +57,15 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     
     raise "Could not find subscriber by that email: '#{email}' on this mailing list '#{self.data(:name)}'."
   end
+
+  def add_subscriber(subscriber)
+    res = aos.req_json("v1/mailinglists/#{self.data(:id)}/subscriptions/#{subscriber.data(:id)}", :post)
+    if res["Message"] == "OK"
+      res["Result"].to_i > 0
+    else
+      raise "Unexpected result: '#{res["Result"]}'."
+    end
+  end
   
   def remove_subscriber(subscriber)
     res = aos.req_json("v1/mailinglists/#{self.data(:id)}/subscriptions/#{subscriber.data(:id)}", :delete)
