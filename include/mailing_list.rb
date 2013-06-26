@@ -60,7 +60,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
   def add_subscriber(subscriber)
     res = aos.req_json("v1/mailinglists/#{self.data(:id)}/subscriptions/#{subscriber.data(:id)}", :post)
-    if res["Message"] == "OK"
+    if res["Message"] == "Succesfully created Subscription"
       res["Result"].to_i > 0
     else
       raise "Unexpected result: '#{res["Result"]}'."
