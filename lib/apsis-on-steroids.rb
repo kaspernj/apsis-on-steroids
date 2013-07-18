@@ -42,6 +42,12 @@ class ApsisOnSteroids
     end
   end
   
+  # Closes connection and removes all references to resource-objects.
+  def destroy
+    @http.destroy if @http
+    @http = nil
+  end
+  
   def mailing_lists
     res = req_json("v1/mailinglists/1/999")
     
