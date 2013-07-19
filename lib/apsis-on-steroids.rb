@@ -119,4 +119,32 @@ class ApsisOnSteroids
     # Return the result.
     return res
   end
+  
+  def parse_obj(obj)
+    if obj.is_a?(Array)
+      ret = []
+      obj.each do |obj_i|
+        ret << parse_obj(obj_i)
+      end
+      
+      return ret
+    elsif obj.is_a?(Hash)
+      ret = {}
+      obj.each do |key, val|
+        ret[key] = parse_obj(val)
+      end
+      
+      return ret
+    elsif obj.is_a?(String)
+      # Automatically convert dates.
+      if match = obj.match(/^\/Date\((\d+)\+(\d+)\)\//)
+        unix_t = match[1].to_i / 1000
+        return Time.at(unix_t)
+      end
+      
+      return obj
+    else
+      return obj
+    end
+  end
 end

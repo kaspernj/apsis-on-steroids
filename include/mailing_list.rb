@@ -53,7 +53,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     data_subscribers.each do |sub_data|
       sub = ApsisOnSteroids::Subscriber.new(
         :aos => self.aos,
-        :data => sub_data
+        :data => aos.parse_obj(sub_data)
       )
       
       yield sub
