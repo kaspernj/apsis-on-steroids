@@ -29,7 +29,7 @@ describe "ApsisOnSteroids" do
   end
 
   it "can get a mailing list" do
-    aos.mailing_list_by_name("kj")
+    mlist = aos.mailing_list_by_name("kj")
   end
 
   context do
@@ -76,15 +76,21 @@ describe "ApsisOnSteroids" do
     it "can lookup the subscriber on the list" do
       mlist.subscriber_by_email(sub.data(:email)).should_not eq nil
     end
+    
+    it "can get lists of subscribers from lists" do
+      original_sub = sub
+      
+      count = 0
+      mlist.subscribers do |sub_i|
+        count += 1
+        #puts "Subscriber: #{sub_i}"
+      end
+      
+      raise "Expected more than one." if count <= 1
+    end
 
     it "can remove subscribers from lists" do
       mlist.remove_subscriber(sub)
-    end
-
-    it "can get lists of subscribers from lists" do
-      mlist.subscribers do |sub|
-        puts "Subscriber: #{sub}"
-      end
     end
 
     it "can validate if a subscriber is active or not" do

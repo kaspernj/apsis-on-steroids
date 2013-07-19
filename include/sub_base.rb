@@ -15,6 +15,10 @@ class ApsisOnSteroids::SubBase
   def data(name)
     name = name.to_sym
     return @data[name] if @data.key?(name)
-    raise "No such data: '#{name}'."
+    raise "No such data: '#{name}' in fields: #{@data.keys}"
+  end
+  
+  def debugs(str)
+    self.aos.debugs(str)
   end
 end

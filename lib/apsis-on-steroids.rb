@@ -48,6 +48,10 @@ class ApsisOnSteroids
     @http = nil
   end
   
+  def debugs(str)
+    puts str if @args[:debug]
+  end
+  
   def mailing_lists
     res = req_json("v1/mailinglists/1/999")
     

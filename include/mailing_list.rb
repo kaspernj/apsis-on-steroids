@@ -1,3 +1,5 @@
+require "uri"
+
 class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
   def create_subscribers(data)
     res = aos.req_json("v1/subscribers/mailinglist/#{data(:id)}/queue", :post, :json => data)
@@ -8,12 +10,13 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     loop do
       sleep 1
       res = aos.req_json(url.path)
+      debugs "Result: #{res}"
 
       if res["State"] == "2"
         data_url = URI.parse(res["DataUrl"])
         data_subscribers = aos.req_json(data_url.path)
         break
-      elsif res["State"] == "0"
+      elsif res["State"] == "0" || res["State"] == "1"
         # Keep waiting.
       else
         raise "Unknown state: '#{res["State"]}': #{res}."
@@ -35,19 +38,26 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     loop do
       sleep 1
       res = aos.req_json(url.path)
-
+      
       if res["State"] == "2"
         data_url = URI.parse(res["DataUrl"])
         data_subscribers = aos.req_json(data_url.path)
         break
-      elsif res["State"] == "0"
+      elsif res["State"] == "0" || res["State"] == "1"
         # Keep waiting.
       else
         raise "Unknown state: '#{res["State"]}': #{res}."
       end
     end
 
-    data_subscribers
+    data_subscribers.each do |sub_data|
+      sub = ApsisOnSteroids::Subscriber.new(
+        :aos => self.aos,
+        :data => sub_data
+      )
+      
+      yield sub
+    end
   end
   
   def subscriber_by_email(email)
@@ -86,20 +96,18 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     url = URI.parse(res["Result"]["PollURL"])
     data = nil
     
-    Timeout.timeout(30) do
-      loop do
-        sleep 0.5
-        res = aos.req_json(url.path)
-        
-        if res["State"] == "2"
-          data_url = URI.parse(res["DataUrl"])
-          data = aos.req_json(data_url.path)
-          break
-        elsif res["State"] == "0"
-          # Keep waiting.
-        else
-          raise "Unknown state: '#{res["State"]}': #{res}"
-        end
+    loop do
+      sleep 1
+      res = aos.req_json(url.path)
+      
+      if res["State"] == "2"
+        data_url = URI.parse(res["DataUrl"])
+        data = aos.req_json(data_url.path)
+        break
+      elsif res["State"] == "0" || res["State"] == "1"
+        # Keep waiting.
+      else
+        raise "Unknown state: '#{res["State"]}': #{res}"
       end
     end
     
