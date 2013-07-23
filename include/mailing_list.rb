@@ -7,19 +7,21 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     url = URI.parse(res["Result"]["PollURL"])
     data_subscribers = nil
     
-    loop do
-      sleep 1
-      res = aos.req_json(url.path)
-      debugs "Result: #{res}"
+    Timeout.timeout(300) do
+      loop do
+        sleep 1
+        res = aos.req_json(url.path)
+        debugs "Result: #{res}"
 
-      if res["State"] == "2"
-        data_url = URI.parse(res["DataUrl"])
-        data_subscribers = aos.req_json(data_url.path)
-        break
-      elsif res["State"] == "0" || res["State"] == "1"
-        # Keep waiting.
-      else
-        raise "Unknown state: '#{res["State"]}': #{res}."
+        if res["State"] == "2"
+          data_url = URI.parse(res["DataUrl"])
+          data_subscribers = aos.req_json(data_url.path)
+          break
+        elsif res["State"] == "0" || res["State"] == "1"
+          # Keep waiting.
+        else
+          raise "Unknown state: '#{res["State"]}': #{res}."
+        end
       end
     end
 
@@ -35,18 +37,20 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     url = URI.parse(res["Result"]["PollURL"])
     data_subscribers = nil
     
-    loop do
-      sleep 1
-      res = aos.req_json(url.path)
-      
-      if res["State"] == "2"
-        data_url = URI.parse(res["DataUrl"])
-        data_subscribers = aos.req_json(data_url.path)
-        break
-      elsif res["State"] == "0" || res["State"] == "1"
-        # Keep waiting.
-      else
-        raise "Unknown state: '#{res["State"]}': #{res}."
+    Timeout.timeout(300) do
+      loop do
+        sleep 1
+        res = aos.req_json(url.path)
+        
+        if res["State"] == "2"
+          data_url = URI.parse(res["DataUrl"])
+          data_subscribers = aos.req_json(data_url.path)
+          break
+        elsif res["State"] == "0" || res["State"] == "1"
+          # Keep waiting.
+        else
+          raise "Unknown state: '#{res["State"]}': #{res}."
+        end
       end
     end
 
@@ -96,18 +100,20 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     url = URI.parse(res["Result"]["PollURL"])
     data = nil
     
-    loop do
-      sleep 1
-      res = aos.req_json(url.path)
-      
-      if res["State"] == "2"
-        data_url = URI.parse(res["DataUrl"])
-        data = aos.req_json(data_url.path)
-        break
-      elsif res["State"] == "0" || res["State"] == "1"
-        # Keep waiting.
-      else
-        raise "Unknown state: '#{res["State"]}': #{res}"
+    Timeout.timeout(300) do
+      loop do
+        sleep 1
+        res = aos.req_json(url.path)
+        
+        if res["State"] == "2"
+          data_url = URI.parse(res["DataUrl"])
+          data = aos.req_json(data_url.path)
+          break
+        elsif res["State"] == "0" || res["State"] == "1"
+          # Keep waiting.
+        else
+          raise "Unknown state: '#{res["State"]}': #{res}"
+        end
       end
     end
     
