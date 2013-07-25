@@ -111,5 +111,12 @@ describe "ApsisOnSteroids" do
       sub.active?.should eql(true)
       mlist.member?(sub).should eql(true)
     end
+    
+    it "should be able to opt out a subscriber" do
+      mlist.opt_out_subscriber(sub)
+      mlist.opt_out?(sub).should eql(true)
+      mlist.opt_out_remove_subscriber(sub)
+      mlist.opt_out?(sub).should eql(false)
+    end
   end
 end

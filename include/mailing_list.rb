@@ -164,4 +164,56 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       raise "Unexpected result: '#{data}'." if element["Value"] != "Succefully deleted"
     end
   end
+  
+  # Moves a subscriber to the opt-out-list.
+  def opt_out_subscriber(sub)
+    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/subscribers/queued", :post, :json => [{
+      "ExternalId" => "",
+      "Reason" => "",
+      "SendQueueId" => 0,
+      "SubscriberId" => sub.data(:id)
+    }])
+    raise "Unexpected result: #{res}" if res["Code"] != 1
+    data = aos.read_queued_response(res["Result"]["PollURL"])
+    
+    raise data if data["FailedSubscriberIds"] && data["FailedSubscriberIds"].any?
+  end
+  
+  # Returns a list of subscribers on the opt-out-list.
+  def opt_out_list
+    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/queued", :post)
+    raise "Unexpected result: #{res}" if res["Code"] != 1
+    data = aos.read_queued_response(res["Result"]["PollURL"])
+    
+    ret = []
+    data.each do |opt_out_data|
+      sub = ApsisOnSteroids::Subscriber.new(:aos => aos, :data => {:id => opt_out_data["Id"], :email => opt_out_data["Email"]})
+      
+      if block_given?
+        yield sub
+      else
+        ret << sub
+      end
+    end
+    
+    return ret
+  end
+  
+  # Returns true if the given subscriber is on the opt-out-list.
+  def opt_out?(sub)
+    opt_out_list do |sub_opt_out|
+      return true if sub_opt_out.data(:email) == sub.data(:email) || sub.data(:id).to_i == sub_opt_out.data(:id).to_i
+    end
+    
+    return false
+  end
+  
+  # Removes the given subscriber from the opt-out-list.
+  def opt_out_remove_subscriber(sub)
+    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/subscribers/queued", :delete, :json => [
+      sub.data(:email)
+    ])
+    data = aos.read_queued_response(res["Result"]["PollURL"])
+    raise data if data["FailedSubscriberEmails"] && data["FailedSubscriberEmails"].any?
+  end
 end

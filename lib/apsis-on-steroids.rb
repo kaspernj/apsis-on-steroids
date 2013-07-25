@@ -120,6 +120,26 @@ class ApsisOnSteroids
     return res
   end
   
+  def read_queued_response(url)
+    uri = URI.parse(url)
+    
+    Timeout.timeout(300) do
+      loop do
+        sleep 1
+        res = req_json(uri.path)
+        
+        if res["State"] == "2"
+          uri_data = URI.parse(res["DataUrl"])
+          return req_json(uri_data.path)
+        elsif res["State"] == "1" || res["State"] == "0"
+          # Keep waiting.
+        else
+          raise "Unknown state '#{res["State"]}': #{res}"
+        end
+      end
+    end
+  end
+  
   def parse_obj(obj)
     if obj.is_a?(Array)
       ret = []
