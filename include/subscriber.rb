@@ -44,4 +44,19 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
     raise data["FailedUpdatedSubscribers"].to_s if data["FailedUpdatedSubscribers"] && data["FailedUpdatedSubscribers"].any?
     return nil
   end
+  
+  # Returns an array of mailing lists that the sucscriber is subscribed to.
+  def mailing_lists
+    ret = []
+    
+    res = aos.req_json("v1/subscribers/#{self.data(:id)}/mailinglists")
+    raise "Unexpected result: #{res}" if res["Code"] != 1 || !res["Result"].is_a?(Hash)
+    
+    res["Result"]["Mailinglists"].each do |mlist_data|
+      mlist = ApsisOnSteroids::MailingList.new(:data => mlist_data, :aos => aos)
+      ret << mlist
+    end
+    
+    return ret
+  end
 end

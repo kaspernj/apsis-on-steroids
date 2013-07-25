@@ -33,7 +33,12 @@ describe "ApsisOnSteroids" do
   end
 
   context do
-    let(:mlist) { aos.mailing_list_by_name("kj") }
+    let(:mlist) do
+      mlist = aos.mailing_list_by_name("kj")
+      mlist.remove_all_subscribers
+      mlist
+    end
+    
     let(:sub) do
       email = "kaspernj#{Time.now.to_f}@naoshi-dev.com"
       mlist.create_subscribers([{
@@ -95,6 +100,16 @@ describe "ApsisOnSteroids" do
 
     it "can validate if a subscriber is active or not" do
       sub.active?.should eql(true)
+    end
+    
+    it "can subscribe, remove and then re-subscribe" do
+      sub.active?.should eql(true)
+      
+      mlist.remove_subscriber(sub)
+      mlist.add_subscriber(sub)
+      
+      sub.active?.should eql(true)
+      mlist.member?(sub).should eql(true)
     end
   end
 end

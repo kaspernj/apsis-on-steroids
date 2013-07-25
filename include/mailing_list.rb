@@ -64,6 +64,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     end
   end
   
+  # Adds the given email as a new subscriber and subscribes the created subscriber to the mailing list.
   def subscriber_by_email(email)
     sub = aos.subscriber_by_email(email)
 
@@ -75,7 +76,8 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     
     raise "Could not find subscriber by that email: '#{email}' on this mailing list '#{self.data(:name)}'."
   end
-
+  
+  # Adds the given subscriber to the mailing list.
   def add_subscriber(subscriber)
     res = aos.req_json("v1/mailinglists/#{self.data(:id)}/subscriptions/#{subscriber.data(:id)}", :post)
     if res["Message"] == "Succesfully created Subscription"
@@ -85,6 +87,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     end
   end
   
+  # Removes the given subscriber from the mailing list.
   def remove_subscriber(subscriber)
     res = aos.req_json("v1/mailinglists/#{self.data(:id)}/subscriptions/#{subscriber.data(:id)}", :delete)
     if res["Message"] == "Successfully deleted Subscription"
@@ -94,6 +97,46 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     end
   end
   
+  # Removes all subscribers from the mailing list.
+  def remove_all_subscribers
+    res = aos.req_json("v1/mailinglists/#{self.data(:id)}/subscriptions/all", :delete)
+    raise "Unexpected result: #{res}" if res["Code"] != 1
+    url = URI.parse(res["Result"]["PollURL"])
+    data = nil
+    
+    Timeout.timeout(300) do
+      loop do
+        sleep 1
+        
+        res = aos.req_json(url.path)
+        
+        if res["State"] == "2"
+          url_data = URI.parse(res["DataUrl"])
+          data = aos.req_json(url_data.path)
+          break
+        elsif res["State"] == "0" || res["State"] == "1"
+          # Keep waiting.
+        else
+          raise "Unknown state '#{res["State"]}': #{res}"
+        end
+      end
+    end
+    
+    return nil
+  end
+  
+  # Returns true if the given subscriber is a member of the mailing list.
+  def member?(sub)
+    sub.mailing_lists.each do |mlist|
+      if mlist.data(:id) == self.data(:id)
+        return true
+      end
+    end
+    
+    return false
+  end
+  
+  # Deletes the mailing list from APSIS.
   def delete
     res = aos.req_json("v1/mailinglists/", :delete, :json => [data(:id)])
     
