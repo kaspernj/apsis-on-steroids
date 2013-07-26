@@ -1,14 +1,31 @@
 class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
   # Fetches the details from the server and returns them.
   def details
-    res = aos.req_json("v1/subscribers/id/#{data(:id)}")
-    
-    ret = {}
-    res["Result"].each do |key, val|
-      ret[key.to_sym] = val
+    if !@details
+      res = aos.req_json("v1/subscribers/id/#{data(:id)}")
+      
+      ret = {}
+      res["Result"].each do |key, val|
+        ret[key.to_sym] = val
+      end
+      
+      @details = ret
     end
     
-    return ret
+    return @details
+  end
+  
+  # Returns the DemDataField by the given key.
+  def dem_data(key)
+    key = key.to_s.downcase
+    
+    self.details[:DemDataFields].each do |dem_data|
+      if dem_data["Key"].to_s.downcase == key
+        return dem_data["Value"]
+      end
+    end
+    
+    return nil
   end
   
   # Returns true if the subscriber is active.
@@ -42,6 +59,7 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
     end
     
     raise data["FailedUpdatedSubscribers"].to_s if data["FailedUpdatedSubscribers"] && data["FailedUpdatedSubscribers"].any?
+    @details = nil
     return nil
   end
   

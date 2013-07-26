@@ -51,7 +51,7 @@ describe "ApsisOnSteroids" do
     it "can create subscribers" do
       sub
     end
-
+    
     it "can get subscribers and their details" do
       details = sub.details
       details.is_a?(Hash).should eql(true)
@@ -91,7 +91,7 @@ describe "ApsisOnSteroids" do
         #puts "Subscriber: #{sub_i}"
       end
       
-      raise "Expected more than one." if count <= 1
+      raise "Expected more than one." if count < 1
     end
 
     it "can remove subscribers from lists" do
@@ -117,6 +117,12 @@ describe "ApsisOnSteroids" do
       mlist.opt_out?(sub).should eql(true)
       mlist.opt_out_remove_subscriber(sub)
       mlist.opt_out?(sub).should eql(false)
+    end
+    
+    it "trying to an email that does not exist should raise the correct error" do
+      expect{
+        aos.subscriber_by_email("asd@asd.com")
+      }.to raise_error(ApsisOnSteroids::Errors::SubscriberNotFound)
     end
   end
 end

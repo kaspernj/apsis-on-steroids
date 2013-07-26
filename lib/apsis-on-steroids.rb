@@ -82,12 +82,12 @@ class ApsisOnSteroids
     
     raise "Could not find mailing list by that name: '#{name}'."
   end
-    
+  
   def subscriber_by_email(email)
     begin
       res = req_json("v1/subscribers/email/lookup/#{CGI.escape(email)}")
     rescue
-      raise "Could not find subscriber by that email in the system"
+      raise ApsisOnSteroids::Errors::SubscriberNotFound, "Could not find subscriber by that email in the system: '#{email}'."
     end
   
     sub = ApsisOnSteroids::Subscriber.new(

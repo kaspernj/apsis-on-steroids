@@ -28,6 +28,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     data_subscribers
   end
   
+  # Returns the subscribers of the mailing list.
   def subscribers
     res = aos.req_json("v1/mailinglists/#{data(:id)}/subscribers/all", :post, :json => {
       "AllDemographics" => false,
@@ -53,15 +54,22 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
         end
       end
     end
-
+    
+    ret = []
     data_subscribers.each do |sub_data|
       sub = ApsisOnSteroids::Subscriber.new(
         :aos => self.aos,
         :data => aos.parse_obj(sub_data)
       )
       
-      yield sub
+      if block_given?
+        yield sub
+      else
+        ret << sub
+      end
     end
+    
+    return ret
   end
   
   # Adds the given email as a new subscriber and subscribes the created subscriber to the mailing list.
