@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "apsis-on-steroids"
-  s.version = "0.0.6"
+  s.version = "0.0.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["kaspernj"]
-  s.date = "2013-08-29"
+  s.date = "2013-10-14"
   s.description = "A Ruby API for the Apsis mail service. "
   s.email = "k@spernj.org"
   s.extra_rdoc_files = [
