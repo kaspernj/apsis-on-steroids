@@ -37,28 +37,41 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
   
   # Update one or more details on the subscriber.
   def update(data)
-    res = aos.req_json("v1/subscribers/queue", :post, :json => [data.merge(:Id => self.data(:id))])
-    url = URI.parse(res["Result"]["PollURL"])
-    data = nil
-    
-    Timeout.timeout(300) do
-      loop do
-        sleep 1
-        res = aos.req_json(url.path)
-        
-        if res["State"] == "2"
-          url_data = URI.parse(res["DataUrl"])
-          data = aos.req_json(url_data.path)
-          break
-        elsif res["State"] == "0" || res["State"] == "1"
-          # Keep waiting.
-        else
-          raise "Unknown state '#{res["State"]}': #{res}"
+    begin
+      res = aos.req_json("v1/subscribers/queue", :post, :json => [data.merge(:Id => self.data(:id))])
+      url = URI.parse(res["Result"]["PollURL"])
+      data = nil
+      
+      Timeout.timeout(300) do
+        loop do
+          sleep 1
+          res = aos.req_json(url.path)
+          
+          if res["State"] == "2"
+            url_data = URI.parse(res["DataUrl"])
+            data = aos.req_json(url_data.path)
+            break
+          elsif res["State"] == "0" || res["State"] == "1"
+            # Keep waiting.
+          else
+            raise "Unknown state '#{res["State"]}': #{res}"
+          end
         end
       end
+      
+      if data["FailedUpdatedSubscribers"] && data["FailedUpdatedSubscribers"].any?
+        msg = raise data["FailedUpdatedSubscribers"].to_s
+        
+        if msg.include?("Timeout expired.")
+          raise Errno::EAGAIN, msg
+        else
+          raise msg
+        end
+      end
+    rescue Errno::EAGAIN
+      retry
     end
     
-    raise data["FailedUpdatedSubscribers"].to_s if data["FailedUpdatedSubscribers"] && data["FailedUpdatedSubscribers"].any?
     @details = nil
     return nil
   end
