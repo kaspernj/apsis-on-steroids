@@ -125,7 +125,7 @@ describe "ApsisOnSteroids" do
       }.to raise_error(ApsisOnSteroids::Errors::SubscriberNotFound)
     end
 
-    it "can create, finda and remove subscriber with +" do
+    it "can create, find and remove a subscriber with +" do
       email = "kaspernj#{Time.now.to_f}+test@naoshi-dev.com"
       mlist.create_subscribers([{
         :Email => email,
