@@ -124,5 +124,15 @@ describe "ApsisOnSteroids" do
         aos.subscriber_by_email("asd@asd.com")
       }.to raise_error(ApsisOnSteroids::Errors::SubscriberNotFound)
     end
+
+    it "can create, find and remove a subscriber with +" do
+      email = "kaspernj#{Time.now.to_f}+test@naoshi-dev.com"
+      mlist.create_subscribers([{
+        :Email => email,
+        :Name => "Kasper Johansen"
+      }])
+      sub = aos.subscriber_by_email(email)
+      mlist.remove_subscriber(sub)
+    end
   end
 end
