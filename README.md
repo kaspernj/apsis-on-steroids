@@ -15,7 +15,7 @@ aos = ApsisOnSteroids.new(
 ```ruby
 aos.create_mailing_list(
   :Name => "my_awesome_list",
-   :FromName => "Kasper Johansen",
+  :FromName => "Kasper Johansen",
   :FromEmail => "kj@naoshi-dev.com",
   :CharacterSet => "utf-8"
 )
