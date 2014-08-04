@@ -11,19 +11,19 @@ describe "ApsisOnSteroids" do
   it "can connect" do
     aos
   end
-  
+
   it "should create and delete a mailing list" do
     name = "create-mlist-#{Time.now.to_f.to_s}"
-    
+
     aos.create_mailing_list(
       :Name => name,
       :FromName => "Kasper Johansen",
       :FromEmail => "kj@naoshi-dev.com",
       :CharacterSet => "utf-8"
     )
-    
+
     mlist = aos.mailing_list_by_name(name)
-    
+
     sleep 1
     mlist.delete
   end
@@ -32,13 +32,39 @@ describe "ApsisOnSteroids" do
     mlist = aos.mailing_list_by_name("kj")
   end
 
+  it "#sendings_by_date_interval" do
+    date_from = Date.new(2014, 6, 1)
+    date_to = Date.new(2014, 6, 4)
+
+    list = aos.sendings_by_date_interval(date_from, date_to).to_a
+    list.empty?.should_not eq true
+
+    sending = list.first
+    puts "Sending data: #{sending.data_hash}"
+
+    mlists = sending.mailing_lists.first
+    puts "MList: #{mlists.data_hash}"
+
+    click = sending.clicks.first
+    puts "Click data: #{click.data_hash}"
+
+    open = sending.opens.first
+    puts "Open data: #{open.data_hash}"
+
+    bounce = sending.bounces.first
+    puts "Bounce data: #{bounce.data_hash}"
+
+    opt_outs_count = sending.opt_outs(count: true)
+    puts "Opt outs count: #{opt_outs_count}"
+  end
+
   context do
     let(:mlist) do
       mlist = aos.mailing_list_by_name("kj")
       mlist.remove_all_subscribers
       mlist
     end
-    
+
     let(:sub) do
       email = "kaspernj#{Time.now.to_f}@naoshi-dev.com"
       mlist.create_subscribers([{
@@ -47,11 +73,11 @@ describe "ApsisOnSteroids" do
       }])
       aos.subscriber_by_email(email)
     end
-  
+
     it "can create subscribers" do
       sub
     end
-    
+
     it "can get subscribers and their details" do
       details = sub.details
       details.is_a?(Hash).should eql(true)
@@ -81,16 +107,16 @@ describe "ApsisOnSteroids" do
     it "can lookup the subscriber on the list" do
       mlist.subscriber_by_email(sub.data(:email)).should_not eq nil
     end
-    
+
     it "can get lists of subscribers from lists" do
       original_sub = sub
-      
+
       count = 0
       mlist.subscribers do |sub_i|
         count += 1
         #puts "Subscriber: #{sub_i}"
       end
-      
+
       raise "Expected more than one." if count < 1
     end
 
@@ -101,24 +127,24 @@ describe "ApsisOnSteroids" do
     it "can validate if a subscriber is active or not" do
       sub.active?.should eql(true)
     end
-    
+
     it "can subscribe, remove and then re-subscribe" do
       sub.active?.should eql(true)
-      
+
       mlist.remove_subscriber(sub)
       mlist.add_subscriber(sub)
-      
+
       sub.active?.should eql(true)
       mlist.member?(sub).should eql(true)
     end
-    
+
     it "should be able to opt out a subscriber" do
       mlist.opt_out_subscriber(sub)
       mlist.opt_out?(sub).should eql(true)
       mlist.opt_out_remove_subscriber(sub)
       mlist.opt_out?(sub).should eql(false)
     end
-    
+
     it "trying to an email that does not exist should raise the correct error" do
       expect{
         aos.subscriber_by_email("asd@asd.com")

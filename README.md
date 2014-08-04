@@ -11,6 +11,11 @@ aos = ApsisOnSteroids.new(
 )
 ```
 
+### List all mailing lists.
+```ruby
+aos.mailing_lists
+```
+
 ### Create a mailing list
 ```ruby
 aos.create_mailing_list(
@@ -81,8 +86,26 @@ aos.subscribers do |sub|
 end
 ```
 
+### Get sendings
+```ruby
+date_from = Date.new(2014, 6, 17)
+date_to = Date.new(2014, 6, 24)
+
+sendings = apsis.sendings_by_date_interval(@date_from, @date_to).to_a
+```
+
+### Get data from sendings
+sendings.opens(count: true) #=> 5
+sendings.bounces(count: true) #=> 1
+sendings.clicks(count: true) #=> 3
+sendings.opt_outs(count: true) #=> 1
+
+sendings.clicks.each do |click|
+  puts "ClickData: #{click.data_hash}"
+end
+
 ## Contributing to apsis-on-steroids
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.
 * Fork the project.
