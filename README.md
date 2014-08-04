@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/kaspernj/apsis-on-steroids/badges/gpa.svg)](https://codeclimate.com/github/kaspernj/apsis-on-steroids)
+
 # apsis-on-steroids
 
 Library that implements the Apsis API in Ruby in regards to administrating subscribers and such for newsletters.
