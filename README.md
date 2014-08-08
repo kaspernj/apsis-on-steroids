@@ -9,7 +9,7 @@ Library that implements the Apsis API in Ruby in regards to administrating subsc
 ### Connecting
 ```ruby
 aos = ApsisOnSteroids.new(
-  :api_key => "[your api key]"
+  api_key: "[your api key]"
 )
 ```
 
@@ -21,10 +21,10 @@ aos.mailing_lists
 ### Create a mailing list
 ```ruby
 aos.create_mailing_list(
-  :Name => "my_awesome_list",
-  :FromName => "Kasper Johansen",
-  :FromEmail => "kj@naoshi-dev.com",
-  :CharacterSet => "utf-8"
+  Name: "my_awesome_list",
+  FromName: "Kasper Johansen",
+  FromEmail: "kj@naoshi-dev.com",
+  CharacterSet: "utf-8"
 )
 ```
 
@@ -48,11 +48,11 @@ sub = mlist.subscriber_by_email("some@email.com")
 mlist.create_subscribers(
   [
     {
-      :Email => "some@email.com",
-      :Name => "Some Name"
+      Email: "some@email.com",
+      Name: "Some Name"
     },{
-      :Email => "some_other@email.com",
-      :Name => "Some Name"
+      Email: "some_other@email.com",
+      Name: "Some Name"
     }
   ]
 )
@@ -65,7 +65,7 @@ puts "Details: #{sub.details}"
 
 ### Update subscribers.
 ```ruby
-sub.update(:Email => "some_third@email.com")
+sub.update(Email: "some_third@email.com")
 ```
 
 ### Remove subscriber from a mailing list.
@@ -97,6 +97,7 @@ sendings = apsis.sendings_by_date_interval(@date_from, @date_to).to_a
 ```
 
 ### Get data from sendings
+```ruby
 sendings.opens(count: true) #=> 5
 sendings.bounces(count: true) #=> 1
 sendings.clicks(count: true) #=> 3
@@ -105,6 +106,7 @@ sendings.opt_outs(count: true) #=> 1
 sendings.clicks.each do |click|
   puts "ClickData: #{click.data_hash}"
 end
+```
 
 ## Contributing to apsis-on-steroids
 
