@@ -33,26 +33,20 @@ describe "ApsisOnSteroids" do
   end
 
   it "#sendings_by_date_interval" do
-    date_from = Date.new(2014, 6, 1)
-    date_to = Date.new(2014, 6, 4)
+    date_from = Date.new(2013, 4, 1)
+    date_to = Date.new(2013, 6, 2)
 
     list = aos.sendings_by_date_interval(date_from, date_to).to_a
-    list.empty?.should_not eq true
+    raise "list is empty!?" if list.empty?
 
     sending = list.first
     puts "Sending data: #{sending.data_hash}"
 
-    mlists = sending.mailing_lists.first
-    puts "MList: #{mlists.data_hash}"
-
-    click = sending.clicks.first
-    puts "Click data: #{click.data_hash}"
-
-    open = sending.opens.first
-    puts "Open data: #{open.data_hash}"
-
+    # Test the call doesnt fail.
+    sending.mailing_lists.first
+    sending.clicks.first
+    sending.opens(date_from: date_from, date_to: date_to).first
     bounce = sending.bounces.first
-    puts "Bounce data: #{bounce.data_hash}"
 
     opt_outs_count = sending.opt_outs(count: true)
     puts "Opt outs count: #{opt_outs_count}"
