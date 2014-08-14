@@ -64,12 +64,12 @@ private
       return res["Result"]["TotalCount"]
     end
 
-    resource_url = resource_url.gsub("%{size}", "200")
+    resource_url = resource_url.gsub("%{size}", "1000")
 
     Enumerator.new do |yielder|
       loop do
-        resource_url = resource_url.gsub("%{page}", page.to_s)
-        res = aos.req_json(resource_url)
+        resource_url_to_use = resource_url.gsub("%{page}", page.to_s)
+        res = aos.req_json(resource_url_to_use)
 
         aos.read_resources_from_array(resource_name, res["Result"]["Items"]).each do |resource|
           yielder << resource
