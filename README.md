@@ -58,6 +58,11 @@ mlist.create_subscribers(
 )
 ```
 
+### Count subscribers on a mailing list.
+```ruby
+mlist.count_subscribers #=> 105
+```
+
 ### Get details about subscribers.
 ```ruby
 puts "Details: #{sub.details}"
