@@ -43,6 +43,11 @@ mlist.delete
 sub = mlist.subscriber_by_email("some@email.com")
 ```
 
+### Get a specific subscriber without dealing with mailing lists:
+```ruby
+sub = aos.subscriber_by_email("some@email.com")
+```
+
 ### Create one or more subscribers in a mailing list.
 ```ruby
 mlist.create_subscribers(
