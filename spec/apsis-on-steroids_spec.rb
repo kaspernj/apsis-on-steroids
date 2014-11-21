@@ -102,6 +102,11 @@ describe "ApsisOnSteroids" do
       mlist.subscriber_by_email(sub.data(:email)).should_not eq nil
     end
 
+    it "should count subscribers on mailing lists" do
+      count = mlist.count_subscribers
+      count.is_a?(Integer).should eq true
+    end
+
     it "can get lists of subscribers from lists" do
       original_sub = sub
 
