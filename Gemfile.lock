@@ -52,6 +52,7 @@ GEM
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.8.0)
     string-cases (0.0.0)
+    tretry (0.0.2)
 
 PLATFORMS
   ruby
@@ -63,3 +64,4 @@ DEPENDENCIES
   rdoc (~> 3.12)
   rspec (~> 2.8.0)
   string-cases
+  tretry (= 0.0.2)

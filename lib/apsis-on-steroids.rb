@@ -3,6 +3,7 @@ require "http2"
 require "string-cases"
 require "timeout"
 require "cgi"
+require "tretry"
 
 class ApsisOnSteroids
   STRFTIME_FORMAT = "%Y%m%dT%H%M%S"
@@ -19,21 +20,7 @@ class ApsisOnSteroids
     raise "Invalid API key: '#{args[:api_key]}' from: '#{args}'." if args[:api_key].to_s.strip.empty?
 
     @args = args
-    @http = Http2.new(
-      host: "se.api.anpdm.com",
-      port: 8443,
-      ssl: true,
-      follow_redirects: false,
-      debug: args[:debug],
-      extra_headers: {
-        "Accept" => "text/json, application/json"
-      },
-      basic_auth: {
-        user: @args[:api_key],
-        passwd: ""
-      },
-      skip_port_in_host_header: true
-    )
+    reconnect
 
     if block_given?
       begin
@@ -143,13 +130,28 @@ class ApsisOnSteroids
 
   def req_json(url, type = :get, method_args = {})
     # Parse arguments, send and parse the result.
-    args = { :url => url.start_with?('/') ? url[1..-1] : url }.merge(method_args)
-    http_res = @http.__send__(type, args)
+    args = {url: url.start_with?('/') ? url[1..-1] : url}.merge(method_args)
+    try = ::Tretry.new
+    try.timeout = 300
 
-    begin
-      res = JSON.parse(http_res.body)
-    rescue JSON::ParserError
-      raise "Invalid JSON given: '#{http_res.body}'."
+    if type == :get
+      try.tries = 3
+      try.before_retry { @http.reconnect }
+    else
+      # Don't retry a manipulatable method!
+      try.tries = 1
+    end
+
+    res = nil
+    try.try do
+      http_res = @http.__send__(type, args)
+
+      # Throw custom JSON error for debugging if the JSON was corrupt (this actually happens!).
+      begin
+        res = JSON.parse(http_res.body)
+      rescue JSON::ParserError
+        raise "Invalid JSON given: '#{http_res.body}'."
+      end
     end
 
     # Check for various kind of server errors and raise them as Ruby errors if present.
@@ -180,7 +182,7 @@ class ApsisOnSteroids
     end
   end
 
-  def read_resources_from_array resource_class_name, resource_array
+  def read_resources_from_array(resource_class_name, resource_array)
     Enumerator.new do |yielder|
       resource_array.each do |resource_data|
         resource = ApsisOnSteroids.const_get(resource_class_name).new(aos: self, data: resource_data)
@@ -218,5 +220,27 @@ class ApsisOnSteroids
     else
       return obj
     end
+  end
+
+private
+
+  def reconnect
+    @http.destroy if @http
+
+    @http = Http2.new(
+      host: "se.api.anpdm.com",
+      port: 8443,
+      ssl: true,
+      follow_redirects: false,
+      debug: @args[:debug],
+      extra_headers: {
+        "Accept" => "text/json, application/json"
+      },
+      basic_auth: {
+        user: @args[:api_key],
+        passwd: ""
+      },
+      skip_port_in_host_header: true
+    )
   end
 end
