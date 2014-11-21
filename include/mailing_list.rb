@@ -2,7 +2,7 @@ require "uri"
 
 class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
   def create_subscribers(data)
-    res = aos.req_json("v1/subscribers/mailinglist/#{data(:id)}/queue", :post, :json => data)
+    res = aos.req_json("v1/subscribers/mailinglist/#{data(:id)}/queue", :post, json: data)
 
     url = URI.parse(res["Result"]["PollURL"])
     data_subscribers = nil
@@ -30,7 +30,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
   # Returns the subscribers of the mailing list.
   def subscribers
-    res = aos.req_json("v1/mailinglists/#{data(:id)}/subscribers/all", :post, :json => {
+    res = aos.req_json("v1/mailinglists/#{data(:id)}/subscribers/all", :post, json: {
       "AllDemographics" => false,
       "FieldNames" => []
     })
@@ -58,8 +58,8 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     ret = []
     data_subscribers.each do |sub_data|
       sub = ApsisOnSteroids::Subscriber.new(
-        :aos => self.aos,
-        :data => aos.parse_obj(sub_data)
+        aos: self.aos,
+        data: aos.parse_obj(sub_data)
       )
 
       if block_given?
@@ -152,7 +152,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
   # Deletes the mailing list from APSIS.
   def delete
-    res = aos.req_json("v1/mailinglists/", :delete, :json => [data(:id)])
+    res = aos.req_json("v1/mailinglists/", :delete, json: [data(:id)])
 
     url = URI.parse(res["Result"]["PollURL"])
     data = nil
@@ -181,7 +181,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
   # Moves a subscriber to the opt-out-list.
   def opt_out_subscriber(sub)
-    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/subscribers/queued", :post, :json => [{
+    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/subscribers/queued", :post, json: [{
       "ExternalId" => "",
       "Reason" => "",
       "SendQueueId" => 0,
@@ -201,7 +201,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
     ret = []
     data.each do |opt_out_data|
-      sub = ApsisOnSteroids::Subscriber.new(:aos => aos, :data => {:id => opt_out_data["Id"], :email => opt_out_data["Email"]})
+      sub = ApsisOnSteroids::Subscriber.new(aos: aos, data: {id: opt_out_data["Id"], email: opt_out_data["Email"]})
 
       if block_given?
         yield sub
@@ -224,7 +224,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
   # Removes the given subscriber from the opt-out-list.
   def opt_out_remove_subscriber(sub)
-    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/subscribers/queued", :delete, :json => [
+    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/subscribers/queued", :delete, json: [
       sub.data(:email)
     ])
     data = aos.read_queued_response(res["Result"]["PollURL"])

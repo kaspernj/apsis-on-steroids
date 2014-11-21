@@ -3,8 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "ApsisOnSteroids" do
   let(:aos) do
     ApsisOnSteroids.new(
-      :api_key => File.read("#{File.dirname(__FILE__)}/api_key.txt").strip,
-      :debug => false
+      api_key: File.read("#{File.dirname(__FILE__)}/api_key.txt").strip,
+      debug: false
     )
   end
 
@@ -40,7 +40,7 @@ describe "ApsisOnSteroids" do
     raise "list is empty!?" if list.empty?
 
     sending = list.first
-    puts "Sending data: #{sending.data_hash}"
+    # puts "Sending data: #{sending.data_hash}"
 
     # Test the call doesnt fail.
     sending.mailing_lists.first
@@ -49,7 +49,6 @@ describe "ApsisOnSteroids" do
     bounce = sending.bounces.first
 
     opt_outs_count = sending.opt_outs(count: true)
-    puts "Opt outs count: #{opt_outs_count}"
   end
 
   context do
