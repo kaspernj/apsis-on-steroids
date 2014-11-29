@@ -1,17 +1,17 @@
 class ApsisOnSteroids::Sending < ApsisOnSteroids::SubBase
-  def clicks args = {}
+  def clicks(args = {})
     list_for("v1/clicks/sendqueues/%{send_queue_id}/page/%{page}/size/%{size}", "v1/sendqueues/%{send_queue_id}/clicks", "Click", args)
   end
 
-  def opens args = {}
+  def opens(args = {})
     list_for("v1/opens/sendqueues/%{send_queue_id}/page/%{page}/size/%{size}", "v1/sendqueues/%{send_queue_id}/opens", "Open", args)
   end
 
-  def bounces args = {}
+  def bounces(args = {})
     list_for("v1/bounces/sendqueues/%{send_queue_id}/page/%{page}/size/%{size}", "v1/sendqueues/%{send_queue_id}/bounces", "Bounce", args)
   end
 
-  def opt_outs args = {}
+  def opt_outs(args = {})
     list_for("v1/optouts/sendqueues/%{send_queue_id}/%{page}/%{size}", "v1/sendqueues/%{send_queue_id}/optouts", "OptOut", args)
   end
 
@@ -26,7 +26,7 @@ class ApsisOnSteroids::Sending < ApsisOnSteroids::SubBase
 
 private
 
-  def list_for_with_dates resource_url, resource_name, args
+  def list_for_with_dates(resource_url, resource_name, args)
     resource_url = resource_url.gsub("%{send_queue_id}", data(:send_queue_id).to_s)
 
     ub = aos.new_url_builder
@@ -48,7 +48,7 @@ private
     end
   end
 
-  def list_for resource_url, resource_url_with_dates, resource_name, args = {}
+  def list_for(resource_url, resource_url_with_dates, resource_name, args = {})
     # OptOut counting does not work :-( We will have to do the date request to fix this...
     # If date-arguments are given, we will have to use the date request.
     if args[:date_from] || args[:date_to] || resource_name == "OptOut"
