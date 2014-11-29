@@ -72,8 +72,6 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
         data: aos.parse_obj(sub_data)
       )
 
-      puts "SubData: #{sub_data}"
-
       if all_demographics || !fields.empty?
         sub.instance_variable_set(:@dem_data_fields, sub_data["DemographicData"])
       end
