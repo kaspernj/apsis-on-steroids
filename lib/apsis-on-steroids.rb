@@ -197,7 +197,7 @@ class ApsisOnSteroids
 
     loop do
       resource_url_to_use = resource_url.gsub("%{page}", page.to_s)
-      result = aos.req_json(resource_url_to_use)
+      result = req_json(resource_url_to_use)
 
       result["Result"]["Items"].each do |resource_data|
         yield resource_data

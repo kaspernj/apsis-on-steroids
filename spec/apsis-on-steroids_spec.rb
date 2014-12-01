@@ -134,7 +134,7 @@ describe "ApsisOnSteroids" do
       original_sub = sub
 
       count = 0
-      mlist.subscribers(fields: ["NaoshiID"]) do |sub_i|
+      mlist.subscribers(field_names: ["NaoshiID"]) do |sub_i|
         count += 1
         sub_i.instance_variable_get(:@dem_data_fields).should eq [{"Key" => "NaoshiID", "Value" => ""}]
       end

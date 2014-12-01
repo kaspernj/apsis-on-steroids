@@ -36,7 +36,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     allow_paginated = args.key?(:allow_paginated) ? args[:allow_paginated] : true
 
     # Abort and do paginated if no reason to get everything as JSON.
-    if allow_paginated && !all_demographic && field_names.empty?
+    if allow_paginated && !all_demographics && field_names.empty?
       return subscribers_paginated(&blk)
     end
 
@@ -72,7 +72,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
         data: aos.parse_obj(sub_data)
       )
 
-      if all_demographics || !fields.empty?
+      if all_demographics || !field_names.empty?
         sub.instance_variable_set(:@dem_data_fields, sub_data["DemographicData"])
       end
 
