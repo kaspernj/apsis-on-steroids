@@ -29,7 +29,12 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
   end
 
   # Returns the subscribers of the mailing list.
+  SUBSCRIBERS_VALID_ARGS = [:all_demographics, :timeout, :field_names, :allow_paginated]
   def subscribers(args = {}, &blk)
+    args.each do |key, value|
+      raise "Invalid argument: '#{key}'." unless SUBSCRIBERS_VALID_ARGS.include?(key)
+    end
+
     all_demographics = args.key?(:all_demographics) ? args[:all_demographics] : false
     timeout = args[:timeout] || 300
     field_names = args[:field_names] || []
