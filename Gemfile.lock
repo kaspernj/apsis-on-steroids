@@ -16,7 +16,7 @@ GEM
       oauth2
     hashie (3.2.0)
     highline (1.6.21)
-    http2 (0.0.25)
+    http2 (0.0.28)
       string-cases
     jeweler (1.8.8)
       builder
@@ -59,7 +59,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (>= 1.0.0)
-  http2 (~> 0.0.25)
+  http2 (~> 0.0.28)
   jeweler (~> 1.8.4)
   rdoc (~> 3.12)
   rspec (~> 2.8.0)
