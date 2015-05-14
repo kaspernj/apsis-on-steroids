@@ -33,6 +33,8 @@ describe "ApsisOnSteroids" do
   end
 
   it "#sendings_by_date_interval" do
+    require 'date'
+
     date_from = Date.new(2013, 4, 1)
     date_to = Date.new(2013, 6, 2)
 
