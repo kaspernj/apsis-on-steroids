@@ -1,7 +1,7 @@
 class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
   # Fetches the details from the server and returns them.
   def details
-    if !@details
+    unless @details
       res = aos.req_json("v1/subscribers/id/#{data(:id)}")
 
       ret = {}
@@ -19,18 +19,19 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
   def dem_data(key)
     key = key.to_s.downcase
 
-    self.details[:DemDataFields].each do |dem_data|
-      if dem_data["Key"].to_s.downcase == key
-        return dem_data["Value"]
-      end
+    dem_data_fields.each do |dem_data|
+      return dem_data["Value"] if dem_data["Key"].to_s.downcase == key
     end
 
     return nil
   end
 
+  def dem_data_fields
+    @dem_data_fields ||= details[:DemDataFields]
+  end
+
   # Returns true if the subscriber is active.
   def active?
-    details = self.details
     return false if details[:pending]
     return true
   end

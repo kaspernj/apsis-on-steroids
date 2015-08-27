@@ -98,6 +98,20 @@ aos.subscribers do |sub|
 end
 ```
 
+### Bundle various field names in same request (which means they are already preloaded and won't cause an extra request each time you ask for the fields)
+```ruby
+aos.subscribers(field_names: ["MyData1", "MyData2"]) do |sub|
+  # do something
+end
+```
+
+### Bundle all data in same request
+```ruby
+aos.subscribers(all_demographics: true) do |sub|
+  # do something
+end
+```
+
 ### Get sendings
 ```ruby
 date_from = Date.new(2014, 6, 17)

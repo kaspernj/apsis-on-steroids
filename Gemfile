@@ -3,7 +3,7 @@ source "http://rubygems.org"
 # Example:
 #   gem "activesupport", ">= 2.3.5"
 
-gem "http2", "~> 0.0.25"
+gem "http2", "~> 0.0.31"
 gem "string-cases"
 gem "tretry", "0.0.2"
 

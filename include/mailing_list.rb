@@ -28,17 +28,33 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     data_subscribers
   end
 
+  SUBSCRIBERS_VALID_ARGS = [:all_demographics, :timeout, :field_names, :allow_paginated]
+
   # Returns the subscribers of the mailing list.
-  def subscribers
+  def subscribers(args = {}, &blk)
+    args.each do |key, value|
+      raise "Invalid argument: '#{key}'." unless SUBSCRIBERS_VALID_ARGS.include?(key)
+    end
+
+    all_demographics = args.key?(:all_demographics) ? args[:all_demographics] : false
+    timeout = args[:timeout] || 300
+    field_names = args[:field_names] || []
+    allow_paginated = args.key?(:allow_paginated) ? args[:allow_paginated] : true
+
+    # Abort and do paginated if no reason to get everything as JSON.
+    if allow_paginated && !all_demographics && field_names.empty?
+      return subscribers_paginated(&blk)
+    end
+
     res = aos.req_json("v1/mailinglists/#{data(:id)}/subscribers/all", :post, json: {
-      "AllDemographics" => false,
-      "FieldNames" => []
+      "AllDemographics" => all_demographics,
+      "FieldNames" => field_names
     })
 
     url = URI.parse(res["Result"]["PollURL"])
     data_subscribers = nil
 
-    Timeout.timeout(300) do
+    Timeout.timeout(timeout) do
       loop do
         sleep 1
         res = aos.req_json(url.path)
@@ -57,6 +73,31 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
     ret = []
     data_subscribers.each do |sub_data|
+      sub = ApsisOnSteroids::Subscriber.new(
+        aos: self.aos,
+        data: aos.parse_obj(sub_data)
+      )
+
+      if all_demographics || !field_names.empty?
+        sub.instance_variable_set(:@dem_data_fields, sub_data["DemographicData"])
+      end
+
+      if blk
+        blk.call(sub)
+      else
+        ret << sub
+      end
+    end
+
+    return ret
+  end
+
+  # Returns the subscribers of the mailing list.
+  def subscribers_paginated
+    resource_url = "v1/mailinglists/#{data(:id)}/subscribers/%{page}/%{size}"
+
+    ret = []
+    aos.read_paginated_response(resource_url) do |sub_data|
       sub = ApsisOnSteroids::Subscriber.new(
         aos: self.aos,
         data: aos.parse_obj(sub_data)

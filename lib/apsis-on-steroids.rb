@@ -191,6 +191,27 @@ class ApsisOnSteroids
     end
   end
 
+  def read_paginated_response(resource_url)
+    page = 1
+    resource_url = resource_url.gsub("%{size}", "1000")
+
+    loop do
+      resource_url_to_use = resource_url.gsub("%{page}", page.to_s)
+      result = req_json(resource_url_to_use)
+
+      result["Result"]["Items"].each do |resource_data|
+        yield resource_data
+      end
+
+      size_no = result["Result"]["TotalPages"]
+      if page >= size_no
+        break
+      else
+        page += 1
+      end
+    end
+  end
+
   def parse_obj(obj)
     if obj.is_a?(Array)
       ret = []
@@ -231,6 +252,7 @@ private
       host: "se.api.anpdm.com",
       port: 8443,
       ssl: true,
+      ssl_skip_verify: true,
       follow_redirects: false,
       debug: @args[:debug],
       extra_headers: {

@@ -112,12 +112,47 @@ describe "ApsisOnSteroids" do
       original_sub = sub
 
       count = 0
-      mlist.subscribers do |sub_i|
+      mlist.subscribers(allow_paginated: false) do |sub_i|
         count += 1
         #puts "Subscriber: #{sub_i}"
       end
 
-      raise "Expected more than one." if count < 1
+      count.should > 0
+    end
+
+    it "should include demographics data when set" do
+      original_sub = sub
+
+      count = 0
+      mlist.subscribers(all_demographics: true) do |sub_i|
+        count += 1
+        sub_i.instance_variable_get(:@dem_data_fields).should_not eq nil
+      end
+
+      count.should > 0
+    end
+
+    it "should include optional fields as demographic data when set" do
+      original_sub = sub
+
+      count = 0
+      mlist.subscribers(field_names: ["NaoshiID"]) do |sub_i|
+        count += 1
+        sub_i.instance_variable_get(:@dem_data_fields).should eq [{"Key" => "NaoshiID", "Value" => ""}]
+      end
+
+      count.should > 0
+    end
+
+    it "should get subscribers paginated" do
+      original_sub = sub
+
+      count = 0
+      mlist.subscribers_paginated do |sub_i|
+        count += 1
+      end
+
+      count.should > 0
     end
 
     it "can remove subscribers from lists" do
