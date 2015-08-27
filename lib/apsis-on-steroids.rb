@@ -252,6 +252,7 @@ private
       host: "se.api.anpdm.com",
       port: 8443,
       ssl: true,
+      ssl_skip_verify: true,
       follow_redirects: false,
       debug: @args[:debug],
       extra_headers: {

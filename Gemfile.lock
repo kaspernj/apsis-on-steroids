@@ -59,9 +59,12 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (>= 1.0.0)
-  http2 (~> 0.0.28)
+  http2 (~> 0.0.31)
   jeweler (~> 1.8.4)
   rdoc (~> 3.12)
   rspec (~> 2.8.0)
   string-cases
   tretry (= 0.0.2)
+
+BUNDLED WITH
+   1.10.5
