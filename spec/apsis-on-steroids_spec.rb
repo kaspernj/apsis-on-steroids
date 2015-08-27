@@ -150,7 +150,6 @@ describe "ApsisOnSteroids" do
       count = 0
       mlist.subscribers_paginated do |sub_i|
         count += 1
-        #puts "Subscriber: #{sub_i}"
       end
 
       count.should > 0
