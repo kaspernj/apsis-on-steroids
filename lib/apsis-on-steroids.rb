@@ -262,7 +262,8 @@ private
         user: @args[:api_key],
         passwd: ""
       },
-      skip_port_in_host_header: true
+      skip_port_in_host_header: true,
+      raise_errors: false
     )
   end
 end
