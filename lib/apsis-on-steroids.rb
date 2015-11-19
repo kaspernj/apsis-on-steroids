@@ -129,6 +129,19 @@ class ApsisOnSteroids
   end
 
   def req_json(url, type = :get, method_args = {})
+    req(url, type, method_args).fetch(:json)
+  end
+
+  def req(url, type = :get, method_args = {})
+    response = request(url, type = :get, method_args = {})
+
+    {
+      json: parse_json_response(response.body),
+      response: response
+    }
+  end
+
+  def request(url, type = :get, method_args = {})
     # Parse arguments, send and parse the result.
     args = {url: url.start_with?('/') ? url[1..-1] : url}.merge(method_args)
     try = ::Tretry.new
@@ -142,24 +155,14 @@ class ApsisOnSteroids
       try.tries = 1
     end
 
+    http_res = nil
     res = nil
-    try.try do
-      http_res = @http.__send__(type, args)
 
-      # Throw custom JSON error for debugging if the JSON was corrupt (this actually happens!).
-      begin
-        res = JSON.parse(http_res.body)
-      rescue JSON::ParserError
-        raise "Invalid JSON given: '#{http_res.body}'."
-      end
+    try.try do
+      return @http.__send__(type, args)
     end
 
-    # Check for various kind of server errors and raise them as Ruby errors if present.
-    raise "Failed on server with code #{res["Code"]}: #{res["Message"]}" if res.is_a?(Hash) && res.key?("Code") && res["Code"] < 0
-    raise "Failed on server with state #{res["State"]} and name '#{res["StateName"]}': #{res["Message"]}" if res.is_a?(Hash) && res.key?("State") && res["State"].to_i < 0
-
-    # Return the result.
-    return res
+    raise "Didn't expect to get here"
   end
 
   def read_queued_response(url)
@@ -265,5 +268,20 @@ private
       skip_port_in_host_header: true,
       raise_errors: false
     )
+  end
+
+  def parse_json_response(raw_body)
+    # Throw custom JSON error for debugging if the JSON was corrupt (this actually happens!).
+    begin
+      res = JSON.parse(raw_body)
+    rescue JSON::ParserError
+      raise "Invalid JSON given: '#{raw_body}'."
+    end
+
+    # Check for various kind of server errors and raise them as Ruby errors if present.
+    raise "Failed on server with code #{res["Code"]}: #{res["Message"]}" if res.is_a?(Hash) && res.key?("Code") && res["Code"] < 0
+    raise "Failed on server with state #{res["State"]} and name '#{res["StateName"]}': #{res["Message"]}" if res.is_a?(Hash) && res.key?("State") && res["State"].to_i < 0
+
+    res
   end
 end
