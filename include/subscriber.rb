@@ -41,16 +41,17 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
     begin
       res = aos.req_json("v1/subscribers/queue", :post, json: [data.merge(:Id => self.data(:id))])
       url = URI.parse(res["Result"]["PollURL"])
-      data = nil
+      result = nil
 
       Timeout.timeout(300) do
         loop do
           sleep 1
-          res = aos.req_json(url.path)
+          data = aos.req(url.path)
+          res = data.fetch(:json)
 
           if res["State"] == "2"
-            url_data = URI.parse(res["DataUrl"])
-            data = aos.req_json(url_data.path)
+            url_data = URI.parse(res.fetch("DataUrl"))
+            result = aos.req_json(url_data.path)
             break
           elsif res["State"] == "0" || res["State"] == "1"
             # Keep waiting.
@@ -60,8 +61,8 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
         end
       end
 
-      if data["FailedUpdatedSubscribers"] && data["FailedUpdatedSubscribers"].any?
-        msg = raise data["FailedUpdatedSubscribers"].to_s
+      if result["FailedUpdatedSubscribers"] && result["FailedUpdatedSubscribers"].any?
+        msg = result["FailedUpdatedSubscribers"].to_s
 
         if msg.include?("Timeout expired.")
           raise Errno::EAGAIN, msg

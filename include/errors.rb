@@ -1,14 +1,17 @@
 class ApsisOnSteroids::Errors
-  class HttpError < RuntimeError
-    attr_accessor :http_response
+  class Error < RuntimeError
+    attr_accessor :response
 
-    def self.http_error_from_response(args)
-      error = ApsisOnSteroids::Errors::HttpError.new(args[:message] || "Unexpected result")
-      error.http_response = args.fetch(:response)
+    def self.error(args)
+      error = new(args[:message] || "Unexpected result")
+      error.response = args[:response]
 
       raise error
     end
   end
 
-  class SubscriberNotFound < RuntimeError; end
+  class InvalidResponse < ApsisOnSteroids::Errors::Error; end
+  class InvalidState < ApsisOnSteroids::Errors::Error; end
+  class FailedOnServer < ApsisOnSteroids::Errors::Error; end
+  class SubscriberNotFound < ApsisOnSteroids::Errors::Error; end
 end

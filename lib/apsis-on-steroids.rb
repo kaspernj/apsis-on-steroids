@@ -112,9 +112,14 @@ class ApsisOnSteroids
 
   def subscriber_by_email(email)
     begin
-      res = req_json("subscribers/v2/email", :post, json: email)
+      data = req("subscribers/v2/email", :post, json: email)
+      json = data.fetch(:json)
+      response = data.fetch(:response)
     rescue
-      raise ApsisOnSteroids::Errors::SubscriberNotFound, "Could not find subscriber by that email in the system: '#{email}'."
+      ApsisOnSteroids::Errors::SubscriberNotFound.error(
+        message: "Could not find subscriber by that email in the system: '#{email}'.",
+        response: response
+      )
     end
 
     sub = ApsisOnSteroids::Subscriber.new(
@@ -134,9 +139,10 @@ class ApsisOnSteroids
 
   def req(url, type = :get, method_args = {})
     response = request(url, type = :get, method_args = {})
+    json = parse_json_response(response)
 
     {
-      json: parse_json_response(response.body),
+      json: json,
       response: response
     }
   end
@@ -270,18 +276,34 @@ private
     )
   end
 
-  def parse_json_response(raw_body)
+  def parse_json_response(response)
     # Throw custom JSON error for debugging if the JSON was corrupt (this actually happens!).
     begin
-      res = JSON.parse(raw_body)
+      json = JSON.parse(response.body)
     rescue JSON::ParserError
-      raise "Invalid JSON given: '#{raw_body}'."
+      ApsisOnSteroids::Errors::InvalidResponse.error(
+        message: "Invalid JSON given: #{response.body}",
+        response: response
+      )
     end
 
     # Check for various kind of server errors and raise them as Ruby errors if present.
-    raise "Failed on server with code #{res["Code"]}: #{res["Message"]}" if res.is_a?(Hash) && res.key?("Code") && res["Code"] < 0
-    raise "Failed on server with state #{res["State"]} and name '#{res["StateName"]}': #{res["Message"]}" if res.is_a?(Hash) && res.key?("State") && res["State"].to_i < 0
+    if json.is_a?(Hash)
+      if json.key?("Code") && json.fetch("Code") < 0
+        ApsisOnSteroids::Errors::FailedOnServer.error(
+          response: response,
+          message: "Failed on server with code #{json.fetch("Code")}: #{json["Message"]}"
+        )
+      end
 
-    res
+      if json.key?("State") && json.fetch("State").to_i < 0
+        ApsisOnSteroids::Errors::FailedOnServer.error(
+          response: response,
+          message: "Failed on server with state #{json.fetch("State")} and name '#{json["StateName"]}': #{res["Message"]}"
+        )
+      end
+    end
+
+    json
   end
 end
