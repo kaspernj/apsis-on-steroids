@@ -255,6 +255,7 @@ private
       ssl_skip_verify: true,
       follow_redirects: false,
       debug: @args[:debug],
+      proxy: @args[:proxy],
       extra_headers: {
         "Accept" => "text/json, application/json"
       },
