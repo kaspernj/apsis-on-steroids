@@ -125,7 +125,7 @@ class ApsisOnSteroids
     sub = ApsisOnSteroids::Subscriber.new(
       aos: self,
       data: {
-        "Id" => res["Result"],
+        "Id" => json["Result"],
         "Email" => email
       }
     )
