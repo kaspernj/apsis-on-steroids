@@ -138,7 +138,7 @@ class ApsisOnSteroids
   end
 
   def req(url, type = :get, method_args = {})
-    response = request(url, type = :get, method_args = {})
+    response = request(url, type, method_args)
     json = parse_json_response(response)
 
     {
