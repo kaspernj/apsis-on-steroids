@@ -10,7 +10,7 @@ gem "tretry", "0.0.2"
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development, :test do
-  gem 'rubocop', '0.34.2', require: false
+  gem 'rubocop', '0.35.1', require: false
 end
 
 group :development do
