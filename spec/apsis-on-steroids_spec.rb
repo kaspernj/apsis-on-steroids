@@ -181,7 +181,7 @@ describe "ApsisOnSteroids" do
     end
 
     it "trying to an email that does not exist should raise the correct error" do
-      expect{
+      expect {
         aos.subscriber_by_email("asd@asd.com")
       }.to raise_error(ApsisOnSteroids::Errors::SubscriberNotFound)
     end
