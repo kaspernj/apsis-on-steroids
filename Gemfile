@@ -21,5 +21,5 @@ group :development do
 end
 
 group :test do
-  gem 'codeclimate-test-reporter', '0.4.7', require: nil
+  gem 'codeclimate-test-reporter', require: nil
 end
