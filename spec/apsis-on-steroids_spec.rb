@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "ApsisOnSteroids" do
   let(:aos) do
     ApsisOnSteroids.new(
-      api_key: File.read("#{File.dirname(__FILE__)}/api_key.txt").strip,
+      api_key: ENV['APSIS_API_KEY'] || File.read("#{File.dirname(__FILE__)}/api_key.txt").strip,
       debug: false
     )
   end
