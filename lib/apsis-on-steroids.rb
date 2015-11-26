@@ -112,15 +112,20 @@ class ApsisOnSteroids
 
   def subscriber_by_email(email)
     begin
-      res = req_json("subscribers/v2/email", :post, json: email)
+      data = req("subscribers/v2/email", :post, json: email)
+      json = data.fetch(:json)
+      response = data.fetch(:response)
     rescue
-      raise ApsisOnSteroids::Errors::SubscriberNotFound, "Could not find subscriber by that email in the system: '#{email}'."
+      ApsisOnSteroids::Errors::SubscriberNotFound.error(
+        message: "Could not find subscriber by that email in the system: '#{email}'.",
+        response: response
+      )
     end
 
     sub = ApsisOnSteroids::Subscriber.new(
       aos: self,
       data: {
-        "Id" => res["Result"],
+        "Id" => json["Result"],
         "Email" => email
       }
     )
@@ -129,6 +134,20 @@ class ApsisOnSteroids
   end
 
   def req_json(url, type = :get, method_args = {})
+    req(url, type, method_args).fetch(:json)
+  end
+
+  def req(url, type = :get, method_args = {})
+    response = request(url, type, method_args)
+    json = parse_json_response(response)
+
+    {
+      json: json,
+      response: response
+    }
+  end
+
+  def request(url, type = :get, method_args = {})
     # Parse arguments, send and parse the result.
     args = {url: url.start_with?('/') ? url[1..-1] : url}.merge(method_args)
     try = ::Tretry.new
@@ -142,24 +161,14 @@ class ApsisOnSteroids
       try.tries = 1
     end
 
+    http_res = nil
     res = nil
-    try.try do
-      http_res = @http.__send__(type, args)
 
-      # Throw custom JSON error for debugging if the JSON was corrupt (this actually happens!).
-      begin
-        res = JSON.parse(http_res.body)
-      rescue JSON::ParserError
-        raise "Invalid JSON given: '#{http_res.body}'."
-      end
+    try.try do
+      return @http.__send__(type, args)
     end
 
-    # Check for various kind of server errors and raise them as Ruby errors if present.
-    raise "Failed on server with code #{res["Code"]}: #{res["Message"]}" if res.is_a?(Hash) && res.key?("Code") && res["Code"] < 0
-    raise "Failed on server with state #{res["State"]} and name '#{res["StateName"]}': #{res["Message"]}" if res.is_a?(Hash) && res.key?("State") && res["State"].to_i < 0
-
-    # Return the result.
-    return res
+    raise "Didn't expect to get here"
   end
 
   def read_queued_response(url)
@@ -266,5 +275,36 @@ private
       skip_port_in_host_header: true,
       raise_errors: false
     )
+  end
+
+  def parse_json_response(response)
+    # Throw custom JSON error for debugging if the JSON was corrupt (this actually happens!).
+    begin
+      json = JSON.parse(response.body)
+    rescue JSON::ParserError
+      ApsisOnSteroids::Errors::InvalidResponse.error(
+        message: "Invalid JSON given: #{response.body}",
+        response: response
+      )
+    end
+
+    # Check for various kind of server errors and raise them as Ruby errors if present.
+    if json.is_a?(Hash)
+      if json.key?("Code") && json.fetch("Code") < 0
+        ApsisOnSteroids::Errors::FailedOnServer.error(
+          response: response,
+          message: "Failed on server with code #{json.fetch("Code")}: #{json["Message"]}"
+        )
+      end
+
+      if json.key?("State") && json.fetch("State").to_i < 0
+        ApsisOnSteroids::Errors::FailedOnServer.error(
+          response: response,
+          message: "Failed on server with state #{json.fetch("State")} and name '#{json["StateName"]}': #{res["Message"]}"
+        )
+      end
+    end
+
+    json
   end
 end
