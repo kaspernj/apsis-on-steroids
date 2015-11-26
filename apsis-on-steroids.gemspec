@@ -57,6 +57,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_development_dependency(%q<bundler>, [">= 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_development_dependency(%q<codeclimate-test-reporter>)
     else
       s.add_dependency(%q<http2>, ["~> 0.0.31"])
       s.add_dependency(%q<string-cases>, [">= 0"])
@@ -65,6 +66,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rdoc>, ["~> 3.12"])
       s.add_dependency(%q<bundler>, [">= 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_dependency(%q<codeclimate-test-reporter>)
     end
   else
     s.add_dependency(%q<http2>, ["~> 0.0.31"])
@@ -74,6 +76,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rdoc>, ["~> 3.12"])
     s.add_dependency(%q<bundler>, [">= 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+    s.add_dependency(%q<codeclimate-test-reporter>)
   end
 end
 
