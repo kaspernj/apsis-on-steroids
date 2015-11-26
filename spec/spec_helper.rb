@@ -1,3 +1,9 @@
+if ENV['CODECLIMATE_REPO_TOKEN']
+  # This must be the very first thing in spec_helper!
+  require 'codeclimate-test-reporter'
+  CodeClimate::TestReporter.start
+end
+
 ENV['RAILS_ENV'] ||= 'test'
 
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))

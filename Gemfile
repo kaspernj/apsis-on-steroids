@@ -19,3 +19,7 @@ group :development do
   gem "bundler", ">= 1.0.0"
   gem "jeweler", "~> 1.8.4"
 end
+
+group :test do
+  gem 'codeclimate-test-reporter', '0.4.7', require: nil
+end
