@@ -13,7 +13,7 @@ class ApsisOnSteroids
   def self.const_missing(name)
     require "#{File.dirname(__FILE__)}/../include/#{::StringCases.camel_to_snake(name)}"
     raise "Still not loaded: '#{name}'." unless ApsisOnSteroids.const_defined?(name)
-    return ApsisOnSteroids.const_get(name)
+    ApsisOnSteroids.const_get(name)
   end
 
   def initialize(args)
@@ -22,13 +22,13 @@ class ApsisOnSteroids
     @args = args
     reconnect
 
-    if block_given?
-      begin
-        yield self
-      ensure
-        @http.destroy
-        @http = nil
-      end
+    return unless block_given?
+
+    begin
+      yield self
+    ensure
+      @http.destroy
+      @http = nil
     end
   end
 
@@ -38,7 +38,7 @@ class ApsisOnSteroids
     ub.port = "8443"
     ub.host = "se.api.anpdm.com"
 
-    return ub
+    ub
   end
 
   # Closes connection and removes all references to resource-objects.
@@ -62,16 +62,13 @@ class ApsisOnSteroids
       )
     end
 
-    return ret
+    ret
   end
 
   def create_mailing_list(data)
     res = req_json("v1/mailinglists/", :post, json: data)
-    if res["Code"] == 1
-      # Success!
-    else
-      raise "Unexpected result: '#{res}'."
-    end
+    return if res["Code"] == 1
+    raise "Unexpected result: '#{res}'."
   end
 
   def sendings_by_date_interval(date_from, date_to)
@@ -130,7 +127,7 @@ class ApsisOnSteroids
       }
     )
 
-    return sub
+    sub
   end
 
   def req_json(url, type = :get, method_args = {})
@@ -149,7 +146,7 @@ class ApsisOnSteroids
 
   def request(url, type = :get, method_args = {})
     # Parse arguments, send and parse the result.
-    args = {url: url.start_with?('/') ? url[1..-1] : url}.merge(method_args)
+    args = {url: url.start_with?("/") ? url[1..-1] : url}.merge(method_args)
     try = ::Tretry.new
     try.timeout = 300
 
@@ -160,9 +157,6 @@ class ApsisOnSteroids
       # Don't retry a manipulatable method!
       try.tries = 1
     end
-
-    http_res = nil
-    res = nil
 
     try.try do
       return @http.__send__(type, args)
@@ -238,10 +232,10 @@ class ApsisOnSteroids
       return ret
     elsif obj.is_a?(String)
       # Automatically convert dates.
-      if match = obj.match(/^\/Date\((\d+)\+(\d+)\)\/$/)
+      if (match = obj.match(%r{^\/Date\((\d+)\+(\d+)\)/$}))
         unix_t = match[1].to_i / 1000
         return Time.at(unix_t)
-      elsif match = obj.match(/^\/Date\((\d+)\)\/$/)
+      elsif (match = obj.match(%r{^/Date\((\d+)\)/$}))
         unix_t = match[1].to_i / 1000
         return Time.at(unix_t)
       end

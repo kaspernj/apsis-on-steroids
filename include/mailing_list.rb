@@ -32,7 +32,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
   # Returns the subscribers of the mailing list.
   def subscribers(args = {}, &blk)
-    args.each do |key, value|
+    args.each_key do |key|
       raise "Invalid argument: '#{key}'." unless SUBSCRIBERS_VALID_ARGS.include?(key)
     end
 
@@ -46,10 +46,12 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       return subscribers_paginated(&blk)
     end
 
-    data = aos.req("v1/mailinglists/#{data(:id)}/subscribers/all", :post, json: {
-      "AllDemographics" => all_demographics,
-      "FieldNames" => field_names
-    })
+    data = aos.req("v1/mailinglists/#{data(:id)}/subscribers/all", :post, json:
+      {
+        "AllDemographics" => all_demographics,
+        "FieldNames" => field_names
+      }
+    )
     res = data.fetch(:json)
     response = data.fetch(:response)
 
@@ -79,7 +81,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     ret = []
     data_subscribers.each do |sub_data|
       sub = ApsisOnSteroids::Subscriber.new(
-        aos: self.aos,
+        aos: aos,
         data: aos.parse_obj(sub_data)
       )
 
@@ -94,7 +96,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       end
     end
 
-    return ret
+    ret
   end
 
   # Returns the subscribers of the mailing list.
@@ -104,7 +106,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
     ret = []
     aos.read_paginated_response(resource_url) do |sub_data|
       sub = ApsisOnSteroids::Subscriber.new(
-        aos: self.aos,
+        aos: aos,
         data: aos.parse_obj(sub_data)
       )
 
@@ -115,7 +117,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       end
     end
 
-    return ret
+    ret
   end
 
   # Adds the given email as a new subscriber and subscribes the created subscriber to the mailing list.
@@ -203,7 +205,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       end
     end
 
-    return nil
+    nil
   end
 
   def count_subscribers
@@ -217,18 +219,16 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       )
     end
 
-    return res.fetch("Result")
+    res.fetch("Result")
   end
 
   # Returns true if the given subscriber is a member of the mailing list.
   def member?(sub)
     sub.mailing_lists.each do |mlist|
-      if mlist.data(:id) == self.data(:id)
-        return true
-      end
+      return true if mlist.data(:id) == data(:id)
     end
 
-    return false
+    false
   end
 
   # Deletes the mailing list from APSIS.
@@ -266,12 +266,14 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
   # Moves a subscriber to the opt-out-list.
   def opt_out_subscriber(sub)
-    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/subscribers/queued", :post, json: [{
-      "ExternalId" => "",
-      "Reason" => "",
-      "SendQueueId" => 0,
-      "SubscriberId" => sub.data(:id)
-    }])
+    res = aos.req_json("v1/optouts/mailinglists/#{data(:id)}/subscribers/queued", :post, json: [
+      {
+        "ExternalId" => "",
+        "Reason" => "",
+        "SendQueueId" => 0,
+        "SubscriberId" => sub.data(:id)
+      }
+    ])
     raise "Unexpected result: #{res}" if res["Code"] != 1
     data = aos.read_queued_response(res["Result"]["PollURL"])
 
@@ -295,7 +297,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       end
     end
 
-    return ret
+    ret
   end
 
   # Returns true if the given subscriber is on the opt-out-list.
@@ -304,7 +306,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
       return true if sub_opt_out.data(:email) == sub.data(:email) || sub.data(:id).to_i == sub_opt_out.data(:id).to_i
     end
 
-    return false
+    false
   end
 
   # Removes the given subscriber from the opt-out-list.

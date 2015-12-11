@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+require "spec_helper"
 
 describe "ApsisOnSteroids" do
   let(:aos) do
@@ -13,13 +13,13 @@ describe "ApsisOnSteroids" do
   end
 
   it "should create and delete a mailing list" do
-    name = "create-mlist-#{Time.now.to_f.to_s}"
+    name = "create-mlist-#{Time.now.to_f}"
 
     aos.create_mailing_list(
-      :Name => name,
-      :FromName => "Kasper Johansen",
-      :FromEmail => "kj@naoshi-dev.com",
-      :CharacterSet => "utf-8"
+      Name: name,
+      FromName: "Kasper Johansen",
+      FromEmail: "kj@naoshi-dev.com",
+      CharacterSet: "utf-8"
     )
 
     mlist = aos.mailing_list_by_name(name)
@@ -29,11 +29,11 @@ describe "ApsisOnSteroids" do
   end
 
   it "can get a mailing list" do
-    mlist = aos.mailing_list_by_name("kj")
+    aos.mailing_list_by_name("kj")
   end
 
   it "#sendings_by_date_interval" do
-    require 'date'
+    require "date"
 
     date_from = Date.new(2013, 4, 1)
     date_to = Date.new(2013, 6, 2)
@@ -48,9 +48,8 @@ describe "ApsisOnSteroids" do
     sending.mailing_lists.first
     sending.clicks.first
     sending.opens(date_from: date_from, date_to: date_to).first
-    bounce = sending.bounces.first
-
-    opt_outs_count = sending.opt_outs(count: true)
+    sending.bounces.first
+    sending.opt_outs(count: true)
   end
 
   context do
@@ -62,10 +61,12 @@ describe "ApsisOnSteroids" do
 
     let(:sub) do
       email = "kaspernj#{Time.now.to_f}@naoshi-dev.com"
-      mlist.create_subscribers([{
-        :Email => email,
-        :Name => "Kasper Johansen"
-      }])
+      mlist.create_subscribers([
+        {
+          Email: email,
+          Name: "Kasper Johansen"
+        }
+      ])
       aos.subscriber_by_email(email)
     end
 
@@ -81,7 +82,7 @@ describe "ApsisOnSteroids" do
 
     it "can update subscribers" do
       new_email = "kaspernj#{Time.now.to_f}-updated@naoshi-dev.com"
-      sub.update(:Email => new_email)
+      sub.update(Email: new_email)
       sleep 1
       sub.details[:Email].should eql(new_email)
       sub.details[:Name].should eql("Kasper Johansen")
@@ -89,11 +90,11 @@ describe "ApsisOnSteroids" do
 
     it "should not overwrite data when updating" do
       phone = Time.now.to_i.to_s
-      sub.update(:PhoneNumber => phone)
+      sub.update(PhoneNumber: phone)
       sub.details[:PhoneNumber].should eql(phone)
 
       new_email = "kaspernj#{Time.now.to_f}-updated@naoshi-dev.com"
-      sub.update(:Email => new_email)
+      sub.update(Email: new_email)
       sub.details[:Email].should eql(new_email)
 
       sub.details[:PhoneNumber].should eql(phone)
@@ -109,19 +110,19 @@ describe "ApsisOnSteroids" do
     end
 
     it "can get lists of subscribers from lists" do
-      original_sub = sub
+      sub
 
       count = 0
-      mlist.subscribers(allow_paginated: false) do |sub_i|
+      mlist.subscribers(allow_paginated: false) do
         count += 1
-        #puts "Subscriber: #{sub_i}"
+        # puts "Subscriber: #{sub_i}"
       end
 
       count.should > 0
     end
 
     it "should include demographics data when set" do
-      original_sub = sub
+      sub
 
       count = 0
       mlist.subscribers(all_demographics: true) do |sub_i|
@@ -133,7 +134,7 @@ describe "ApsisOnSteroids" do
     end
 
     it "should include optional fields as demographic data when set" do
-      original_sub = sub
+      sub
 
       count = 0
       mlist.subscribers(field_names: ["NaoshiID"]) do |sub_i|
@@ -145,10 +146,10 @@ describe "ApsisOnSteroids" do
     end
 
     it "should get subscribers paginated" do
-      original_sub = sub
+      sub
 
       count = 0
-      mlist.subscribers_paginated do |sub_i|
+      mlist.subscribers_paginated do |_sub_i|
         count += 1
       end
 
@@ -181,17 +182,19 @@ describe "ApsisOnSteroids" do
     end
 
     it "trying to an email that does not exist should raise the correct error" do
-      expect{
+      expect do
         aos.subscriber_by_email("asd@asd.com")
-      }.to raise_error(ApsisOnSteroids::Errors::SubscriberNotFound)
+      end.to raise_error(ApsisOnSteroids::Errors::SubscriberNotFound)
     end
 
     it "can create, find and remove a subscriber with +" do
       email = "kaspernj#{Time.now.to_f}+test@naoshi-dev.com"
-      mlist.create_subscribers([{
-        :Email => email,
-        :Name => "Kasper Johansen"
-      }])
+      mlist.create_subscribers([
+        {
+          Email: email,
+          Name: "Kasper Johansen"
+        }
+      ])
       sub = aos.subscriber_by_email(email)
       mlist.remove_subscriber(sub)
     end

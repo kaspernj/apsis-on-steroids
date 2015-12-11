@@ -12,7 +12,7 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
       @details = ret
     end
 
-    return @details
+    @details
   end
 
   # Returns the DemDataField by the given key.
@@ -23,7 +23,7 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
       return dem_data["Value"] if dem_data["Key"].to_s.downcase == key
     end
 
-    return nil
+    nil
   end
 
   def dem_data_fields
@@ -33,13 +33,13 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
   # Returns true if the subscriber is active.
   def active?
     return false if details[:pending]
-    return true
+    true
   end
 
   # Update one or more details on the subscriber.
   def update(data)
     begin
-      res = aos.req_json("v1/subscribers/queue", :post, json: [data.merge(:Id => self.data(:id))])
+      res = aos.req_json("v1/subscribers/queue", :post, json: [data.merge(Id: self.data(:id))])
       url = URI.parse(res["Result"]["PollURL"])
       result = nil
 
@@ -75,14 +75,14 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
     end
 
     @details = nil
-    return nil
+    nil
   end
 
   # Returns an array of mailing lists that the sucscriber is subscribed to.
   def mailing_lists
     ret = []
 
-    res = aos.req_json("v1/subscribers/#{self.data(:id)}/mailinglists")
+    res = aos.req_json("v1/subscribers/#{data(:id)}/mailinglists")
     raise "Unexpected result: #{res}" if res["Code"] != 1 || !res["Result"].is_a?(Hash)
 
     res["Result"]["Mailinglists"].each do |mlist_data|
@@ -90,6 +90,6 @@ class ApsisOnSteroids::Subscriber < ApsisOnSteroids::SubBase
       ret << mlist
     end
 
-    return ret
+    ret
   end
 end

@@ -3,7 +3,7 @@ class ApsisOnSteroids::SubBase
     @args = args
 
     @data = {}
-    @args[:data].each do |key, val|
+    @args.fetch(:data).each do |key, val|
       @data[StringCases.camel_to_snake(key).to_sym] = val
     end
 
@@ -11,7 +11,7 @@ class ApsisOnSteroids::SubBase
   end
 
   def aos
-    return @args[:aos]
+    @args.fetch(:aos)
   end
 
   def data(name)
@@ -21,10 +21,10 @@ class ApsisOnSteroids::SubBase
   end
 
   def data_hash
-    return @data
+    @data
   end
 
   def debugs(str)
-    self.aos.debugs(str)
+    aos.debugs(str)
   end
 end
