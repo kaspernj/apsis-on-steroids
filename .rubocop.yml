@@ -1,8 +1,0 @@
----
-inherit_from:
-- "/media/storage/RVM/gems/ruby-2.1-head/bundler/gems/best_practice_project-a733a53ffa7f/lib/best_practice_project/config/rubocop.yml"
-- ".rubocop_todo.yml"
-
-AllCops:
-  Exclude:
-    - apsis-on-steroids.gemspec

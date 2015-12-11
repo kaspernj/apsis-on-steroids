@@ -32,7 +32,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
 
   # Returns the subscribers of the mailing list.
   def subscribers(args = {}, &blk)
-    args.each do |key, _value|
+    args.each_key do |key|
       raise "Invalid argument: '#{key}'." unless SUBSCRIBERS_VALID_ARGS.include?(key)
     end
 
@@ -51,7 +51,7 @@ class ApsisOnSteroids::MailingList < ApsisOnSteroids::SubBase
         "AllDemographics" => all_demographics,
         "FieldNames" => field_names
       }
-                  )
+    )
     res = data.fetch(:json)
     response = data.fetch(:response)
 

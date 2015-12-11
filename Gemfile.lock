@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/kaspernj/best_practice_project.git
-  revision: a733a53ffa7fcf2af0b49c30fa7d949579319782
+  revision: a1074857127c9c4eaf42e83cb6e058b14ea78497
   specs:
     best_practice_project (0.0.5)
       psych (~> 2.0.0)

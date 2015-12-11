@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + "/spec_helper")
+require "spec_helper"
 
 describe "ApsisOnSteroids" do
   let(:aos) do
@@ -113,7 +113,7 @@ describe "ApsisOnSteroids" do
       sub
 
       count = 0
-      mlist.subscribers(allow_paginated: false) do |_sub_i|
+      mlist.subscribers(allow_paginated: false) do
         count += 1
         # puts "Subscriber: #{sub_i}"
       end
