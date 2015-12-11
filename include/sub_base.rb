@@ -11,7 +11,7 @@ class ApsisOnSteroids::SubBase
   end
 
   def aos
-    return @args[:aos]
+    @args[:aos]
   end
 
   def data(name)
@@ -21,10 +21,10 @@ class ApsisOnSteroids::SubBase
   end
 
   def data_hash
-    return @data
+    @data
   end
 
   def debugs(str)
-    self.aos.debugs(str)
+    aos.debugs(str)
   end
 end
